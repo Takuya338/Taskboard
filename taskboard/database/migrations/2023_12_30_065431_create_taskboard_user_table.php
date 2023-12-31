@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('taskboard_user', function (Blueprint $table) {
+            $table->unsignedBigInteger('taskboardId');  // 符号なしのBig Integerに変更
+            $table->unsignedBigInteger('userId');  // 符号なしのBig Integerに変更
+            //$table->foreign('taskboardId')->references('taskboardId')->on('taskboard')->onDelete('cascade');
+            //$table->foreign('userId')->references('userId')->on('users');
+            $table->unsignedBigInteger('creatorId');  // 必要に応じて型を修正
+            $table->unsignedBigInteger('updaterId');  // 必要に応じて型を修正
+            $table->timestamps();
+            $table->foreign('taskboardId')->references('taskboardId')->on('taskboard')->onDelete('cascade');
+            $table->foreign('userId')->references('userId')->on('users');
+        });
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('taskboard_user');
+    }
+};

@@ -1,0 +1,40 @@
+/* 中央配置型(ログインページなど)のコンテントエリア */
+.center-content {
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 20%;
+    margin-bottom: auto;
+    width: 30%;
+    height: 30%;
+    padding: 10px;
+    background-color: #ddffff;
+}
+/* ボタンの右寄せ */
+.right-button {
+    margin: 0 0 0 auto;
+}
+/* フッター */
+footer {
+    /*border-top: 1px solid black;*/
+    padding: 10px;
+    text-align: center;
+}
+/* ヘッダー */
+.header {
+    background-color: #ddffff;
+    padding: 20px;
+}
+/* コンテンツの位置 */
+.pading-content {
+    padding: 20px;
+}
+/* タスクボードリスト */
+.taskboardlist a {
+    color: black;
+    text-decoration: none;
+}
+
+/* タスク内容 */
+.task_content {
+    resize: none;
+}
