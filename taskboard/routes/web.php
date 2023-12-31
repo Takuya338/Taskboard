@@ -13,8 +13,8 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\AuthController;
 
 // 認証関連
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/', [AuthController::class, 'showLogin']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 // 認証が必要なルートグループ
 Route::middleware(['auth'])->group(function () {

@@ -29,7 +29,8 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard'); // ここにリダイレクト先を指定
+            // タスクボード一覧ページへ遷移
+            return redirect('/taskboards'); // ここにリダイレクト先を指定
         }
 
         return back()->withErrors([
