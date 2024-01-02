@@ -11,8 +11,8 @@
     <a href="{{ route('taskboards.create') }}">新規作成</a>
     <ul>
         @foreach ($taskboards as $taskboard)
-            <li>{{ $taskboard->name }} 
-                <a href="{{ route('taskboards.edit', $taskboard->id) }}">編集</a>
+            <li>{{ $taskboard->taskboardName }} 
+                <a href="{{ route('taskboards.edit', $taskboard->taskboardId) }}">編集</a>
             </li>
         @endforeach
     </ul>
