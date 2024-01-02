@@ -12,7 +12,7 @@
     <ul>
         @foreach ($users as $user)
             <li>{{ $user->name }} 
-                <a href="{{ route('users.edit', $user->id) }}">編集</a>
+                <a href="{{ route('users.edit', $user->userId) }}">編集</a>
             </li>
         @endforeach
     </ul>
