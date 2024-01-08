@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\TaskBoardRepositoryInterface;
+use App\Repositories\TaskBoardRepository;
+use App\Repositories\UserRepositoryInterface;
+use App\Repositories\UserRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,12 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // サービスコンテナ
         $this->app->bind(
-            'App\Repositories\TaskboardRepositoryInterface',
-            'App\Repositories\TaskboardRepository'
-        );
-        $this->app->bind(
-            'App\Repositories\TaskRepositoryInterface',
-            'App\Repositories\TaskRepository'
+            'App\Repositories\TaskBoardRepositoryInterface',
+            'App\Repositories\TaskBoardRepository'
         );
         $this->app->bind(
             'App\Repositories\UserRepositoryInterface',
@@ -40,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
             'App\Services\TaskboardServiceInterface',
             'App\Services\TaskboardService'
         );
-               
+        $this->app->bind(
+            'App\Services\LoginServiceInterface',
+            'App\Services\LoginService'
+        );
     }
 }

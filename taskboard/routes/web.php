@@ -18,7 +18,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 // 認証が必要なルートグループ
 Route::middleware(['auth'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // ユーザー管理
     Route::resource('users', UserController::class);
@@ -33,7 +33,10 @@ Route::middleware(['auth'])->group(function () {
 
     // タスクボード管理
     Route::resource('taskboards', TaskBoardController::class);
-    Route::delete('taskboards/{id}/delete', [TaskBoardController::class, 'destroy'])->name('taskboards.destroy');
+    Route::get('taskboards/{id}/delete', [TaskBoardController::class, 'destroy'])->name('taskboards.destroy');
+    
+    // タスクボード
+    Route::get('taskboards/{id}', [TaskBoardController::class, 'taskboard'])->name('board');
 
     // タスク管理
     Route::get('taskboards/{id}/tasks/create', [TaskController::class, 'create'])->name('tasks.create');

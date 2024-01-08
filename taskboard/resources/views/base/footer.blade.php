@@ -1,0 +1,1 @@
+<b>Copyright © 2023 Takuya Goto All Rights Reserved.</b>

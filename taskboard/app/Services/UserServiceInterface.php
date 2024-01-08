@@ -19,5 +19,5 @@ interface UserServiceInterface {
         public function sendRegisterMail($user, $password);       // 登録完了メールを送信する
         public function sendUpdateMail($user);                    // 更新完了メールを送信する
         public function sendDeleteMail($user);                    // 削除完了メールを送信する
-        public function sendMail($user, $subject, $template);     // メールを送信する
+        public function sendMail($user, $type);                   // メールを送信する
 }

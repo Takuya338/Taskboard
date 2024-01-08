@@ -1,34 +1,38 @@
 {{-- resources/views/auth/login.blade.php --}}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ログイン</title>
-    {{-- ここにスタイルシートのリンクを追加 --}}
-</head>
-<body>
-    <div class="login-container">
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-            <div class="form-group">
-                <label for="email">メールアドレス</label>
-                <input type="email" name="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">パスワード</label>
-                <input type="password" name="password" id="password" required>
-            </div>
-            @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-            <button type="submit" class="btn btn-primary">ログイン</button>
-        </form>
-    </div>
-</body>
-</html>
+@extends('base.baseCenter')
+@section('content')
+
+			<!--タイトル-->
+			<div class="form-group">			
+				<label>タスクボード管理</label>
+			</div>
+
+			<form method="post" action="{{ route('login') }}">
+				@csrf
+				<!--メールアドレス入力フォーム-->
+				<div class="form-group">
+					<label for="email">メールアドレス</label>
+					<input type="email" class="form-control" name="email" id="email" size="50" placeholder="メールアドレス">
+				</div>
+
+				<!--パスワード入力フォーム-->
+				<div class="form-group">
+					<label for="password">パスワード</label>
+					<input type="password" class="form-control" name="password" id="password" size="50" placeholder="パスワード">
+				</div>
+				
+				@if($errors->has('login') || $errors->has('email') || $errors->has('password'))
+				    <p class="text-danger">メールアドレスとパスワードが一致していません</p>
+				@endif
+				
+				<!--送信ボタン-->
+				<div class="form-group text-right">
+					<!--本番用ボタン-->
+					<input type="submit" class="btn btn-primary" value="ログイン">
+					<!--デモ用ボタン-->
+					<!--<a href="taskboardlist.html"><input type="button" class="btn btn-primary" value="ログイン"></a>-->
+				</div>
+				
+			</form>
+
+@endsection
