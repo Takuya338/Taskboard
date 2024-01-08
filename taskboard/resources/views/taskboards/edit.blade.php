@@ -1,31 +1,33 @@
 {{-- resources/views/taskboards/edit.blade.php --}}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>タスクボード編集</title>
-    {{-- スタイルシート等のリンク --}}
-</head>
-<body>
-    <h1>タスクボード編集</h1>
-    <form action="{{ route('taskboards.update', $taskboard->taskboardId) }}" method="post">
-        @csrf
-        @method('put')
-        <div>
-            <label for="name">タスクボード名</label>
-            <input type="text" id="name" name="name" value="{{ $taskboard->taskboardName }}" required>
+@extends('base.baseTemplete')
+@section('content')
+      <!--戻るボタン-->
+      @include('parts.backbutton', ['url'=>route('board', $taskboard[0])])
+
+      <!--タイ
+      トル行-->
+      <div class="row">
+        <!--タイトル-->
+        <div class="col-xl-4 p-3"><h2>タスクボード設定変更</h2></div>
+      </div>
+
+      <!--登録フォーム-->
+      <div class="row">
+        <div class="col-xl-5">
+          <form method="post" action="{{  route('taskboards.update', $taskboard[0]) }}">
+            @csrf
+            @method('PATCH')
+            <!--タスクボード名入力フォーム-->
+            @include('form.text', ['name'=>'name', 'label'=>'タスクボード名', 'placeholder'=>'タスクボード名', 'value'=>$taskboard[1]])
+            
+            <!--利用メンバー-->
+            @include('form.checkbox', ['name'=>'list', 'datas'=>$users, 'label'=>'利用するメンバー', 'selected'=>$userList])
+
+            <!--更新ボタン-->
+            <div class="form-group">
+              <input type="submit" class="btn btn-success" value="更新" />
+            </div>
+          </form>
         </div>
-        <div>
-            <label>利用者選択</label>
-            <select name="users[]" multiple>
-                @foreach ($users as $user)
-                    <option value="{{ $user->userId }}" {{ in_array($user->userId, $userList, false) ? 'selected' : '' }}>
-                        {{ $user->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <button type="submit">更新</button>
-    </form>
-</body>
-</html>
+      </div>
+@endsection

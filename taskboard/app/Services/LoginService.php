@@ -4,6 +4,8 @@
 * @takuya goto
 */
 
+namespace App\Services;
+
 use App\Services\LoginServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;

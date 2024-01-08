@@ -22,13 +22,21 @@ class UserRepository implements UserRepositoryInterface {
     * @return array
     */
     public function searchUser($search) {
-        $users = User::where('name', 'like', "%{$search}%")
-            ->where('user_status', '!=', -1)
-            ->orWhere('email', 'like', "%{$search}%")
-            ->where('user_status', '!=', config('code.user.status.delete'))
-            ->orderBy('id', 'asc')
-            ->get();
-        return $users->toArray();
+        $users = User::where('name', 'like', "%" . $search ."%")
+            ->where('userStatus', '!=', -1)
+            ->orWhere('email', 'like', "%" . $search . "%")
+            ->where('userStatus', '!=', config('code.user.status.delete'))
+            ->orderBy('userId', 'asc')
+            ->get()
+            ->toArray();
+        
+        
+        $list = array();
+        foreach($users as $user)
+        {
+            $list[] = array_values((array)$user);
+        }
+        return $list;
     }
 
     /* 

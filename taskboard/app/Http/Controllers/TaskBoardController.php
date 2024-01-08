@@ -7,15 +7,62 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Taskboard;
 use App\Models\User;
 use App\Models\TaskboardUser;
+use App\Services\TaskboardService;
+use App\Services\TaskboardServiceInterface;
+use App\Services\UserService;
+use App\Services\UserServiceInterface;
 
 class TaskBoardController extends Controller
 {
-    /**
-     * タスクボード一覧を表示します。
-     */
-    public function index()
+    
+    private $taskboardService;
+    private $userService;
+    
+    /*
+    * コンストラクタ
+    */
+    public function __construct(TaskboardServiceInterface $TaskboardService, UserServiceInterface $UserService)
     {
-        $taskboards = Taskboard::all();
+        $this->taskboardService = $TaskboardService;
+        $this->userService = $UserService;
+    }
+    
+    /*
+    * タスクボード一覧を表示します。
+    */
+    public function index(Request $request)
+    {
+        
+        $search = "";
+        
+        // 検索値
+        if(isset($request->search))
+        {
+            $search = $request->search;
+        }
+        
+        $taskboardList = $this->taskboardService->getTaskboardList($search);
+
+        // 日時を日付表記に変更
+        $taskboards = array();
+        foreach($taskboardList as $taskboard)
+        {
+            $board = array();
+            
+            $board[] = $taskboard[0];
+            $board[] = $taskboard[1];
+            $board[] = $taskboard[2];
+           
+            // strtotimeを使用してタイムスタンプに変換
+            $timestamp = strtotime($taskboard[3]);
+            
+            // タイムスタンプを年月日の形式で出力
+            $board[] = date("Y年m月d日", $timestamp);
+            
+            $taskboards[] = $board;
+            
+        }
+
         return view('taskboards.index', compact('taskboards'));
     }
 
@@ -24,7 +71,7 @@ class TaskBoardController extends Controller
      */
     public function create()
     {
-        $users = User::all();
+        $users = $this->userService->getUserList('');
         return view('taskboards.create', compact('users'));
     }
 
@@ -35,31 +82,28 @@ class TaskBoardController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'users' => 'required|array',
+            'list' => 'required|array',
         ]);
         
-        // Authユーザー取得
-        $id = Auth::user()->userId;
-        
-        $taskboard = new Taskboard();
-        $taskboard->taskboardName = $request->name;
-        $taskboard->creatorId = $id;
-        $taskboard->updaterId = $id;
-        $taskboard->save();
+        // タスクボードの作成
+        $taskboard = $this->taskboardService->createTaskboard([$request->name]);
 
+        // タスクボードのID
+        $taskboardId = $taskboard['taskboardId'];
+        
         // タスクボードにユーザーを割り当てる
-        $users = $request->users;
-        foreach($users as $user) {
-            $taskboardUsers = new TaskboardUser();
-            $taskboardUsers->taskboardId = $taskboard->taskboardId;
-            $taskboardUsers->userId = $user;
-            $taskboardUsers->creatorId = $id;
-            $taskboardUsers->updaterId = $id;
-            $taskboardUsers->save();
-        }
-        
+        $users = $request->list;
 
-        return redirect()->route('taskboards.index')->with('success', '新しいタスクボードが作成されました。');
+        // タスクボードの利用者作成
+        $taskboardUsers = $this->taskboardService->createOrUpdateTaskboardUsers($taskboardId, $users);
+       
+        $data = [
+            'message' => '登録完了しました。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボード一覧ページ'
+        ];
+        
+        return view('base.complete', $data);
     }
 
     /**
@@ -67,18 +111,19 @@ class TaskBoardController extends Controller
      */
     public function edit($id)
     {
-        $taskboard = Taskboard::findOrFail($id);
-        
+        // タスクボード情報を取得
+        $board = $this->taskboardService->getTaskboard($id);
+        $taskboard = $board[0];
+
         // タスクボードの利用者一覧を取得
-        $taskboardUsers = TaskboardUser::where('taskboardId')->get();
-        $userList = array(); // ユーザ一覧を格納する配列
-        foreach($taskboardUsers as $taskboardUser) {
-            $userList[] = $taskboardUser->userId;
+        $userArray = $this->taskboardService->getTaskboardUsers($id);
+        $userList = array();
+        foreach($userArray as $user){
+            $userList[] = $user[0];
         }
-        
-        
-        
-        $users = User::all();
+
+        // 全ユーザー一覧を取得
+        $users = $this->userService->getUserList('');
         return view('taskboards.edit', compact('taskboard', 'users', 'userList'));
     }
 
@@ -89,21 +134,26 @@ class TaskBoardController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'users' => 'required|array',
+            'list' => 'required|array',
         ]);
         
-        // Authユーザー取得
-        $id = Auth::user()->userId;
-
-        $taskboard = Taskboard::findOrFail($id);
-        $taskboard->taskboardName = $request->name;
-        $taskboard->updaterId = $id;
-        $taskboard->save();
-
+        // タスクボードの更新
+        $taskboard = $this->taskboardService->updateTaskboard([$id, $request->name]);
+        
         // タスクボードにユーザーを割り当てる
-        $taskboard->users()->sync($request->users);
+        $users = $request->list;
 
-        return redirect()->route('taskboards.index')->with('success', 'タスクボードが更新されました。');
+        // タスクボードの利用者作成
+        $taskboardUsers = $this->taskboardService->createOrUpdateTaskboardUsers($id, $users);
+
+        $data = [
+            'message' => '更新完了しました。',
+            'link' => 'board',
+            'id' => $id,
+            'button' => 'タスクボードページ'
+        ];
+
+        return view('base.complete', $data);
     }
 
     /**
@@ -111,9 +161,44 @@ class TaskBoardController extends Controller
      */
     public function destroy($id)
     {
+        //dd($id);
         $taskboard = Taskboard::findOrFail($id);
         $taskboard->delete();
 
-        return redirect()->route('taskboards.index')->with('success', 'タスクボードが削除されました。');
+        //return redirect()->route('taskboards.index')->with('success', 'タスクボードが削除されました。');
+    
+        $data = [
+            'message' => '削除完了しました。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボードページ'
+        ];
+
+        return view('base.complete', $data);
     }
+
+    /**
+     * タスクボードページの表示
+     */
+    public function show(Request $request, $id)
+    {       
+        // タスクボード情報を取得
+        $board = $this->taskboardService->getTaskboard($id);
+        $taskboard = $board[0];
+
+        // タスクボードの利用者一覧を取得
+        $userArray = $this->taskboardService->getTaskboardUsers($id);
+        $userList = array();
+        foreach($userArray as $user){
+            $userList[] = $user[1];
+        }
+        $userName = implode(",", $userList);
+
+        // タスクを取得
+        $tasks = $this->taskboardService->getTaskboardTasks($id);
+
+        // ユーザー一覧を取得
+        $users = $this->userService->getUserList('');
+
+        return view('taskboards.taskboard', compact('taskboard', 'userList', 'userName', 'tasks', 'users'));
+    } 
 }
