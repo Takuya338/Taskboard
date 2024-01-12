@@ -11,7 +11,7 @@
 
         <!--タスク追加ボタン-->
         <div class="col-xl-2 p-3">
-          <a href="{{ route('', $taskboard[0]) }}"
+          <a href="{{ route('tasks.create', $taskboard[0]) }}"
             ><input type="button" class="btn btn-success" value="タスク追加"
           /></a>
         </div>

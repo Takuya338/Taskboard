@@ -28,8 +28,8 @@ class TaskController extends Controller
         // ユーザー一覧取得
         $users = $this->taskboardService->getTaskboardUsers($id);
         
-        $data = ['taskboadId' => $id,
-                 'datas'=>$users
+        $data = ['taskboardId' => $id,
+                 'users'=>$users
         ];
 
         return view('tasks.create', $data);
@@ -49,13 +49,14 @@ class TaskController extends Controller
         $task = [ 'content' => $request->content,
                   'userId'  => $request->user,
         ];
-
+    
         // タスク作成処理
         $this->taskboardService->createTaskboardTask($id, $task);
 
         $data = [
             'message' => 'タスク追加完了しました。',
-            'link' => 'taskboards.taskboard',
+            'link' => 'board',
+            'id' => $id,
             'button' => 'タスクボードページ'
         ];
 

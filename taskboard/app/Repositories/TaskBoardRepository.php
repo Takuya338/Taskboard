@@ -97,7 +97,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     * @return true
     */
     public function deleteTaskboard($ids) {
-        $taskboard = Taskboard::whereIn('taksboardId', $ids);
+        $taskboard = Taskboard::whereIn('taskboardId', $ids);
         $taskboard->delete();
         return true;
     }
@@ -187,8 +187,8 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
         $task->content    = $data['content'];
         $task->taskStatus = config('code.taskboard.status.todo');
         $task->executorId = $data['userId'];
-        $task->creator_id = $loginId();
-        $task->updater_id = $loginId();
+        $task->creatorId = $loginId;
+        $task->updaterId = $loginId;
         $task->save();
         return $task->toArray();
     }
