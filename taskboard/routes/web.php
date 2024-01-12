@@ -18,7 +18,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 // 認証が必要なルートグループ
 Route::middleware(['auth'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // ユーザー管理
     Route::resource('users', UserController::class);

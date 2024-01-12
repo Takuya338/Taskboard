@@ -3,11 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\LoginService;
 use App\Models\User;
 
 class AuthController extends Controller
 {
+    
+    
+    private $loginService;
+     
+    /**
+    * コンストラクタ
+    */
+    public function __construct(LoginService $LoginService)
+    {
+        $this->loginService = $LoginService;
+    }
+    
+    
     /**
      * ログイン画面を表示します。
      */
@@ -22,20 +35,21 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if ($this->loginService->login($request->email, $request->password)) {
             $request->session()->regenerate();
             // タスクボード一覧ページへ遷移
             return redirect('/taskboards'); // ここにリダイレクト先を指定
         }
 
         return back()->withErrors([
-            'email' => '指定された資格情報が記録と一致しません。',
-        ])->onlyInput('email');
+            'login' => true,
+        ])->onlyInput('login');
     }
 
     /**
@@ -43,7 +57,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        $this->loginService->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/'); // ログアウト後のリダイレクト先

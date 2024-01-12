@@ -7,15 +7,62 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Taskboard;
 use App\Models\User;
 use App\Models\TaskboardUser;
+use App\Services\TaskboardService;
+use App\Services\TaskboardServiceInterface;
+use App\Services\UserService;
+use App\Services\UserServiceInterface;
 
 class TaskBoardController extends Controller
 {
-    /**
-     * タスクボード一覧を表示します。
-     */
-    public function index()
+    
+    private $taskboardService;
+    private $userService;
+    
+    /*
+    * コンストラクタ
+    */
+    public function __construct(TaskboardServiceInterface $TaskboardService, UserServiceInterface $UserService)
     {
-        $taskboards = Taskboard::all();
+        $this->taskboardService = $TaskboardService;
+        $this->userService = $UserService;
+    }
+    
+    /*
+    * タスクボード一覧を表示します。
+    */
+    public function index(Request $request)
+    {
+        
+        $search = "";
+        
+        // 検索値
+        if(isset($request->search))
+        {
+            $search = $request->search;
+        }
+        
+        $taskboardList = $this->taskboardService->getTaskboardList($search);
+
+        // 日時を日付表記に変更
+        $taskboards = array();
+        foreach($taskboardList as $taskboard)
+        {
+            $board = array();
+            
+            $board[] = $taskboard[0];
+            $board[] = $taskboard[1];
+            $board[] = $taskboard[2];
+           
+            // strtotimeを使用してタイムスタンプに変換
+            $timestamp = strtotime($taskboard[3]);
+            
+            // タイムスタンプを年月日の形式で出力
+            $board[] = date("Y年m月d日", $timestamp);
+            
+            $taskboards[] = $board;
+            
+        }
+
         return view('taskboards.index', compact('taskboards'));
     }
 
@@ -24,7 +71,7 @@ class TaskBoardController extends Controller
      */
     public function create()
     {
-        $users = User::all();
+        $users = $this->userService->getUserList('');
         return view('taskboards.create', compact('users'));
     }
 
@@ -35,7 +82,7 @@ class TaskBoardController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'users' => 'required|array',
+            'list' => 'required|array',
         ]);
         
         // Authユーザー取得
@@ -48,7 +95,7 @@ class TaskBoardController extends Controller
         $taskboard->save();
 
         // タスクボードにユーザーを割り当てる
-        $users = $request->users;
+        $users = $request->list;
         foreach($users as $user) {
             $taskboardUsers = new TaskboardUser();
             $taskboardUsers->taskboardId = $taskboard->taskboardId;

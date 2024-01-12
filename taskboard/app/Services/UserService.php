@@ -221,7 +221,7 @@ class UserService implements UserServiceInterface {
     * @return bool
     */
     public function sendMail($user, $type) {
-        try {
+        /*try {
                 // タイトル取得
                 $subject = config('mail.subject.'. $type);
             
@@ -233,7 +233,8 @@ class UserService implements UserServiceInterface {
         } catch (Exception $e) {
                 // メール送信に失敗した場合
                 return false;
-        }
+        }*/
+        return true;
     }
     
 }

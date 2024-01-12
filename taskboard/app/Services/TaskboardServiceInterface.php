@@ -3,7 +3,10 @@
 * File Name: TaskboardServiceInterface.php
 * @takuya goto
 */
-Interface TaskboradServiceInterface {
+
+namespace App\Services;
+
+interface TaskboardServiceInterface {
     public function getTaskboardList($search);                          // タスクボード一覧情報を取得する
     public function createTaskboard(array $data);                       // タスクボードの新規作成
     public function getTaskboard($id);                                  // タスクボード情報を取得する
