@@ -3,13 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Taskboard;
-use App\Models\User;
-use App\Models\TaskboardUser;
-use App\Services\TaskboardService;
 use App\Services\TaskboardServiceInterface;
-use App\Services\UserService;
 use App\Services\UserServiceInterface;
 
 class TaskBoardController extends Controller
@@ -161,12 +155,9 @@ class TaskBoardController extends Controller
      */
     public function destroy($id)
     {
-        //dd($id);
-        $taskboard = Taskboard::findOrFail($id);
-        $taskboard->delete();
+        // タスクボードの削除;
+        $taskboard = $this->taskboardService->deleteTaskboard([$id]);
 
-        //return redirect()->route('taskboards.index')->with('success', 'タスクボードが削除されました。');
-    
         $data = [
             'message' => '削除完了しました。',
             'link' => 'taskboards.index',
@@ -179,8 +170,8 @@ class TaskBoardController extends Controller
     /**
      * タスクボードページの表示
      */
-    public function show(Request $request, $id)
-    {       
+    public function show($id)
+    {    
         // タスクボード情報を取得
         $board = $this->taskboardService->getTaskboard($id);
         $taskboard = $board[0];

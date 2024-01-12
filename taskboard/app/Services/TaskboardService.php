@@ -123,9 +123,32 @@ class TaskboardService implements TaskboardServiceInterface {
     public function getTaskboardTasks($id) {
         return $this->taskboardRepository->getTaskByTaskboardId($id);
     }  
-    public function createTaskboardTask($id, array $data) {}              // タスクボードに紐づくタスクの新規作成
-    public function updateTaskboardTask($id, array $data) {}              // タスクボードに紐づくタスク情報を更新する
-    public function deleteTaskboardTask($id, array $ids) {} 
+
+    /*
+    * タスクボードに紐づくタスクの新規作成
+    * @param $id
+    * @param array $data
+    * @return array
+    */    
+    public function createTaskboardTask($id, array $data) {
+        return $this->taskboardRepository->createTask($id, $data);
+    }
+
+    /*
+    * タスクボードに紐づくタスク情報を更新する
+    * @param $id
+    * @param array $data
+    * @return array
+    */  
+    public function updateTaskboardTask($id, array $data) {}          
     
+    /*
+    * タスクボードに紐づくタスク情報を削除する
+    * @param $id
+    * @param array $data
+    * @return array
+    */
+    public function deleteTaskboardTask($id, array $ids) {}             
+
 
 }

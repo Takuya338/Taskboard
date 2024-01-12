@@ -4,8 +4,7 @@
       <!--戻るボタン-->
       @include('parts.backbutton', ['url'=>route('board', $taskboard[0])])
 
-      <!--タイ
-      トル行-->
+      <!--タイトル行-->
       <div class="row">
         <!--タイトル-->
         <div class="col-xl-4 p-3"><h2>タスクボード設定変更</h2></div>
@@ -16,7 +15,6 @@
         <div class="col-xl-5">
           <form method="post" action="{{  route('taskboards.update', $taskboard[0]) }}">
             @csrf
-            @method('PATCH')
             <!--タスクボード名入力フォーム-->
             @include('form.text', ['name'=>'name', 'label'=>'タスクボード名', 'placeholder'=>'タスクボード名', 'value'=>$taskboard[1]])
             
