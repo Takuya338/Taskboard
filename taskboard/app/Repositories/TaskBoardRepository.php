@@ -8,6 +8,7 @@ namespace App\Repositories;
 
 use App\Models\Taskboard;
 use App\Models\TaskboardUser;
+use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -96,7 +97,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     * @return true
     */
     public function deleteTaskboard($ids) {
-        $taskboard = Taskboard::find($id);
+        $taskboard = Taskboard::whereIn('taksboardId', $ids);
         $taskboard->delete();
         return true;
     }
@@ -183,9 +184,9 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
         $task = new Task();
         $loginId = $this->getLoguinUserId();
         $task->taskboardId = $id;
-        $task->content   = $data['content'];
-        $task->status    = $data['status'];
-        $task->user_id   = $data['user_id'];
+        $task->content    = $data['content'];
+        $task->taskStatus = config('code.taskboard.status.todo');
+        $task->executorId = $data['userId'];
         $task->creator_id = $loginId();
         $task->updater_id = $loginId();
         $task->save();
@@ -203,7 +204,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
         $task->taskboard_id = $id;
         $task->content   = $data['content'];
         $task->status    = $data['status'];
-        $task->user_id   = $data['user_id'];
+        $task->user_id   = $data['userId'];
         $task->updater_id = $this->getLoguinUserId();
         $task->save();
         return $task->toArray();

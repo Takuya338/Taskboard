@@ -40,7 +40,7 @@ Route::middleware(['auth'])->group(function () {
 
     // タスク管理
     Route::get('taskboards/{id}/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
-    Route::post('taskboards/{id}/tasks/create', [TaskController::class, 'store']);
+    Route::post('taskboards/{id}/tasks/create', [TaskController::class, 'store'])->name('tasks.store');
     Route::patch('taskboards/{id}/tasks/{taskId}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
 });
 
