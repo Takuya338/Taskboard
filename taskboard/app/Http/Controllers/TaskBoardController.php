@@ -3,17 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-<<<<<<< HEAD
-use Illuminate\Support\Facades\Auth;
-use App\Models\Taskboard;
-use App\Models\User;
-use App\Models\TaskboardUser;
-use App\Services\TaskboardService;
 use App\Services\TaskboardServiceInterface;
-use App\Services\UserService;
-=======
-use App\Services\TaskboardServiceInterface;
->>>>>>> dc341214038bc7aabd893bac019c77e96156708a
 use App\Services\UserServiceInterface;
 
 class TaskBoardController extends Controller
