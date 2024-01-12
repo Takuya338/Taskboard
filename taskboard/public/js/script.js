@@ -74,9 +74,10 @@ function password_change() {
 //
 //
 ////////////////////////////////////////////////////
-function taskboard_delete() {
+function taskboard_delete(id) {
     // タスクボード削除完了ページへ遷移
-    window.location.href = "taskboard_delete_done.html";
+    //window.location.href = "taskboard_delete_done.html";
+    window.location.href = "/taskboards/" + id + "/delete";
 }
 
 ///////////////////////////////////////////////////

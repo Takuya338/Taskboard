@@ -31,3 +31,19 @@ if(!function_exists('getCodeJp')) {
         return $codeJp[$changedCode];
     }
 }
+
+/*
+* Eloquentモデルを多次元配列に変換する
+* @param  Eloquent
+* @return array
+*/
+if(!function_exists('changeEloquentToArray')) {
+    function changeEloquentToArray($arrays) {
+        $list = array();
+        foreach($arrays as $array)
+        {
+            $list[] = array_values((array)$array);
+        }
+        return $list;
+    }
+}

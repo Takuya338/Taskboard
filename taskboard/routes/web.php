@@ -33,11 +33,14 @@ Route::middleware(['auth'])->group(function () {
 
     // タスクボード管理
     Route::resource('taskboards', TaskBoardController::class);
-    Route::delete('taskboards/{id}/delete', [TaskBoardController::class, 'destroy'])->name('taskboards.destroy');
+    Route::get('taskboards/{id}/delete', [TaskBoardController::class, 'destroy'])->name('taskboards.destroy');
+    
+    // タスクボード
+    Route::get('taskboards/{id}', [TaskBoardController::class, 'taskboard'])->name('board');
 
     // タスク管理
     Route::get('taskboards/{id}/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
-    Route::post('taskboards/{id}/tasks/create', [TaskController::class, 'store']);
+    Route::post('taskboards/{id}/tasks/create', [TaskController::class, 'store'])->name('tasks.store');
     Route::patch('taskboards/{id}/tasks/{taskId}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
 });
 

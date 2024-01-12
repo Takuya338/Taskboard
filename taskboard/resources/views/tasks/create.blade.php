@@ -1,21 +1,40 @@
 {{-- resources/views/tasks/create.blade.php --}}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>タスク追加</title>
-    {{-- スタイルシート等のリンク --}}
-</head>
-<body>
-    <h1>タスク追加</h1>
-    <form action="{{ route('tasks.store', $taskboard->id) }}" method="post">
-        @csrf
-        <div>
-            <label for="title">タスク名</label>
-            <input type="text" id="title" name="title" required>
+
+      <!--戻るボタン-->
+      @include('parts.backbutton', ['url'=>route('board', $taskboadId)])
+
+      <!--タイトル行-->
+      <div class="row">
+        <!--タイトル-->
+        <div class="col-xl-4 p-3"><h2>タスク追加</h2></div>
+      </div>
+
+      <!--登録フォーム-->
+      <div class="row">
+        <div class="col-xl-5">
+          <form method="post" action="{{ route('tasks.store') }}">
+            @csrf
+            <!--タスク内容入力フォーム-->
+            <div class="form-group">
+              <label for="content">タスク内容</label>
+              <textarea
+                class="task_content form-control"
+                name="content"
+                id="content"
+                rows="5"
+                cols="33"
+                maxlength="800"
+                placeholder="タスクの内容">
+              </textarea>
+            </div>
+
+            <!--担当者選択フォーム-->
+            @include('parts.checkbox', ['label'=>'タスク担当者', 'name'=>'user', 'datas'=>$users])
+
+            <!--登録ボタン-->
+            <div class="form-group">
+              <input type="submit" class="btn btn-primary" value="追加">
+            </div>
+          </form>
         </div>
-        {{-- 他のタスク属性をここに追加 --}}
-        <button type="submit">追加</button>
-    </form>
-</body>
-</html>
+      </div>
