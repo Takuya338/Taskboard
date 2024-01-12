@@ -26,11 +26,7 @@
         
         @foreach($taskboards as $taskboard)
         <div class="col-md-2 p-3 taskboardlist">
-<<<<<<< HEAD
-          <a href="{{ route('taskboards.edit', $taskboard[0]) }}">
-=======
           <a href="{{ route('board', $taskboard[0]) }}">
->>>>>>> dc341214038bc7aabd893bac019c77e96156708a
             <div class="card">
               <div class="card-body">
                 <div class="text-center"><h4>{{ $taskboard[1] }}</h4></div>
