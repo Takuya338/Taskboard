@@ -1,48 +1,32 @@
 {{-- resources/views/password/change.blade.php --}}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>パスワード変更</title>
-    {{-- ここにスタイルシートのリンクを追加 --}}
-</head>
-<body>
-    <div class="container">
-        <h1>パスワード変更</h1>
+@extends('base.baseTemplete')
+@section('content')
+      <!--戻るボタン-->
+      @include('parts.backbutton', ['url'=>route('taskboards.index')])
 
-        {{-- エラーメッセージの表示 --}}
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+      <!--タイトル行-->
+      <div class="row">
+        <!--タイトル-->
+        <div class="col-xl-4 p-3"><h2>パスワード変更</h2></div>
+      </div>
 
-        {{-- パスワード変更フォーム --}}
-        <form action="{{ route('password.update') }}" method="post">
+      <!--登録フォーム-->
+      <div class="row">
+        <div class="col-xl-5">
+          <form method="post" action="{{  route('password.update') }}">
             @csrf
-            @method('put')
+            <!--新パスワード入力-->
+            @include('form.password', ['name'=>'password', 'label'=>'パスワード', 'placeholder'=>'新しいパスワード'])
+            
+            <!--新パスワード入力確認-->
+            @include('form.password', ['name'=>'password2', 'label'=>'パスワード(再入力)', 'placeholder'=>'新しいパスワード'])
 
+            <!--登録ボタン-->
             <div class="form-group">
-                <label for="current_password">現在のパスワード</label>
-                <input type="password" class="form-control" id="current_password" name="current_password" required>
+              <input type="submit" class="btn btn-success" value="更新" />
             </div>
-
-            <div class="form-group">
-                <label for="new_password">新しいパスワード</label>
-                <input type="password" class="form-control" id="new_password" name="new_password" required>
-            </div>
-
-            <div class="form-group">
-                <label for="new_password_confirmation">新しいパスワード（確認）</label>
-                <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary">変更</button>
-        </form>
-    </div>
-</body>
-</html>
+            
+          </form>
+        </div>
+      </div>
+@endsection

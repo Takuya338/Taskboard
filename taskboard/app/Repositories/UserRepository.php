@@ -50,7 +50,7 @@ class UserRepository implements UserRepositoryInterface {
                 $user->name = $data['name'];
                 $user->email = $data['email'];
                 if (isset($data['password'])) {
-                    $user->password = $this->hash($data['password']);
+                    $user->password = $this->hashWord($data['password']);
                 }
                 $user->user_type = $data['user_type'];
                 $user->user_status = config('code.user.status.first');
@@ -90,7 +90,7 @@ class UserRepository implements UserRepositoryInterface {
                     $user->name = $data['email'];
                 }
                 if (isset($data['password'])) {
-                    $user->password = $this->hash($data['password']);
+                    $user->password = $this->hashWord($data['password']);
                 }
                 if(isset($data['user_type'])) {
                     $user->user_type = $data['user_type'];
@@ -177,9 +177,9 @@ class UserRepository implements UserRepositoryInterface {
                 $status = 0;
             }
             $user = User::find($id);
-            $user->password = $this->hash($password);
-            $user->update_id = $loginUserId;
-            $user->user_status = $status;
+            $user->password = $this->hashWord($password);
+            $user->updaterId = $loginUserId;
+            $user->userStatus = $status;
             $user->save();
             return $user->toArray();
         } catch (Exception $e) {

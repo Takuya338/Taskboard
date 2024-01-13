@@ -74,6 +74,11 @@ class UserService implements UserServiceInterface {
     public function getUser($id) {
         return $this->userRepository->getUserById($id);
     }
+    
+    /*
+    * 
+    *
+    */
 
     /*
     * ユーザーの設定を更新する
@@ -166,7 +171,7 @@ class UserService implements UserServiceInterface {
 
         // パスワードを更新
         $user = $this->userRepository->changePassword($password);
-
+        
         if(empty($user)) {
             // パスワードの更新に失敗した場合
             return false;

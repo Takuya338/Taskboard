@@ -27,9 +27,9 @@ Route::middleware(['auth'])->group(function () {
 
     // ログイン情報変更
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/edit', [ProfileController::class, 'update']);
+    Route::post('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/password/change', [PasswordController::class, 'change'])->name('password.change');
-    Route::put('/password/change', [PasswordController::class, 'update']);
+    Route::post('/password/change', [PasswordController::class, 'update'])->name('password.update');
 
     // タスクボード管理
     Route::resource('taskboards', TaskBoardController::class);
