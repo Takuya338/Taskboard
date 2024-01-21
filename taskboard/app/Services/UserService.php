@@ -9,6 +9,7 @@ namespace App\Services;
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Services\UserServiceInterface;
 
 class UserService implements UserServiceInterface {
@@ -49,19 +50,23 @@ class UserService implements UserServiceInterface {
 
             if(empty($user)) {
                 // ユーザー作成に失敗した場合
-                return false;
+                return [];
             }
         
             // ユーザーに登録完了メールを送信
-            if(!$this->sendRegisterMail($user, $data['password'])) {
-                return false;
+            $flag = $this->sendRegisterMail($user, $data['password']);
+            
+            if($flag) {
+                // 成功時
+                return $user;
+            } else {
+                // 失敗時
+                return [];
             }
-
-            return true;
 
         } catch (Exception $e) {
             // ユーザー作成に失敗した場合
-            return false;
+            return [];
         }
         
     }
@@ -76,9 +81,13 @@ class UserService implements UserServiceInterface {
     }
     
     /*
-    * 
-    *
+    * ログインしているユーザー情報を取得する
+    * @return array
     */
+    public function getLoginUser() {
+        $id = $this->userRepository->getLoguinUserId();
+        return $this->getUser($id);
+    }
 
     /*
     * ユーザーの設定を更新する
@@ -87,27 +96,37 @@ class UserService implements UserServiceInterface {
     */
     public function updateUser(array $data) {
         try {
-        
-            // ユーザーIDを取得
-            $id = $data['id'];
-                
-            // ユーザーIDを削除
-            unset($data['id']);
-                
+            
+            $id = $this->userRepository->getLoguinUserId();
+            
+            // ユーザーIDが存在する場合はそのIDとする
+            if(isset($data['id'])) {
+                $id = $data['id'];
+                unset($data['id']);
+            }
+            
             // ユーザー情報を更新
             $user = $this->userRepository->updateUser($id, $data);
                 
             if(empty($user)) {
                 // ユーザー情報の更新に失敗した場合
-                return false;
+                return [];
             }
             
             // ユーザーに更新完了メールを送信
-            return $this->sendUpdateMail($user);
+            $flag = $this->sendUpdateMail($user);
+            
+            if($flag) {
+                // 成功時
+                return $user;
+            } else {
+                // 失敗時
+                return [];
+            }
             
         } catch (Exception $e) {    
             // ユーザー情報の更新に失敗した場合
-            return false;
+            return [];
         }
     }
 
@@ -142,7 +161,7 @@ class UserService implements UserServiceInterface {
         $password = $this->makePassword();
 
         // パスワードを更新
-        $user = $this->userRepository->changePassword($id, $password);
+        $user = $this->userRepository->changePassword($password, $id);
 
         if(empty($user)) {
             // パスワードの更新に失敗した場合

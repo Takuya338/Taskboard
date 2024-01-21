@@ -1,33 +1,38 @@
 {{-- resources/views/users/edit.blade.php --}}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ユーザー編集</title>
-    {{-- スタイルシート等のリンク --}}
-</head>
-<body>
-    <h1>ユーザー編集</h1>
-    <form action="{{ route('users.update', $user->userId) }}" method="post">
-        @csrf
-        @method('put')
-        <div>
-            <label for="name">名前</label>
-            <input type="text" id="name" name="name" value="{{ $user->name }}" required>
+@extends('base.baseTemplete')
+@section('content')
+      <!--戻るボタン-->
+      @include('parts.backbutton', ['url'=>route('users.index')])
+
+      <!--タイトル行-->
+      <div class="row">
+        <!--タイトル-->
+        <div class="col-xl-4 p-3"><h2>ユーザー更新</h2></div>
+      </div>
+
+      <!--登録フォーム-->
+      <div class="row">
+        <div class="col-xl-5">
+          <form method="post" action="{{  route('users.update', $userId) }}">
+            @csrf
+            @method('PUT')
+            <!--名前入力フォーム-->
+            @include('form.name', ['value'=> $name])
+            
+            <!--メールアドレス入力フォーム-->
+            @include('form.email', ['value'=> $email])
+            
+            <!--ユーザータイプ選択フォーム-->
+            @include('form.select', ['datas'=>$userTypes,'label'=>'ユーザータイプ','name'=>'userType','selected'=> $Type])
+            
+            <!--利用タスクボード選択フォーム-->
+            @include('form.checkbox', ['name'=>'taskboardUsers', 'datas'=>$taskboards, 'label'=>'利用するタスクボード', 'selected'=>$taskboardUsers])
+
+            <!--登録ボタン-->
+            <div class="form-group">
+              <input type="submit" class="btn btn-success" value="更新" />
+            </div>
+          </form>
         </div>
-        <div>
-            <label for="email">メールアドレス</label>
-            <input type="email" id="email" name="email" value="{{ $user->email }}" required>
-        </div>
-        <div>
-            <label for="password">新しいパスワード（変更する場合）</label>
-            <input type="password" id="password" name="password">
-        </div>
-        <div>
-            <label for="password_confirmation">新しいパスワード（確認）</label>
-            <input type="password" id="password_confirmation" name="password_confirmation">
-        </div>
-        <button type="submit">更新</button>
-    </form>
-</body>
-</html>
+      </div>
+@endsection

@@ -52,7 +52,8 @@ class TaskController extends Controller
     
         // タスク作成処理
         $this->taskboardService->createTaskboardTask($id, $task);
-
+        
+        // 追加完了ページの表示
         $data = [
             'message' => 'タスク追加完了しました。',
             'link' => 'board',
@@ -67,10 +68,17 @@ class TaskController extends Controller
     /*
     * タスク状態変更
     */
-    public function updateStatus(Request $request, $id, $taskId)
+    public function updateStatus($taskboardId, $userId, $taskId, $taskStatus)
     {
+        // タスク状態変更
+        $task = $this->taskboardService->updateTaskboardTask($taskId, [
+            'userId' => $userId,
+            'taskStatus' => $taskStatus
+        ]);
+        
+        
         // タスクボードページへ遷移
-        return redirect()->route('board', ['id' => $id]);
+        return redirect()->route('board', ['id' => $taskboardId]);
     }
 
 }

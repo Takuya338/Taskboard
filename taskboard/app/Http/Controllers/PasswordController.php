@@ -21,8 +21,6 @@ class PasswordController extends Controller
     {
         $this->UserService = $UserService;
     }
-    
-    
       
     /** 
      * パスワード変更画面を表示します。
@@ -66,24 +64,26 @@ class PasswordController extends Controller
     /**
      * パスワードの再発行を処理します。
      */
-    public function reset(Request $request, $id)
+    public function reset($id)
     {
-        // 対象のユーザーを取得
-        $user = User::find($id);
-        if (!$user) {
-            return back()->withErrors(['error' => 'ユーザーが見つかりません。']);
+       // パスワード更新処理
+        $flag = $this->UserService->PasswordReset($id);
+        
+        
+        if($flag) {
+            $data = [
+            'message' => 'パスワード更新完了しました。',
+            'link' => 'users.index',
+            'button' => 'タスクボード一覧ページ'
+            ];
+        } else {
+            $data = [
+            'message' => 'パスワードが更新されませんでした。',
+            'link' => 'users.index',
+            'button' => 'タスクボード一覧ページ'
+            ];
         }
 
-        // 新しいランダムパスワードを生成
-        $newPassword = \Str::random(10);
-
-        // ユーザーのパスワードを更新
-        $user->password = Hash::make($newPassword);
-        $user->save();
-
-        // パスワード再発行用のメールを送信
-        Mail::to($user->email)->send(new PasswordResetMail($newPassword));
-
-        return back()->with('success', '新しいパスワードをユーザーのメールアドレスに送信しました。');
+        return view('base.complete', $data);
     }
 }

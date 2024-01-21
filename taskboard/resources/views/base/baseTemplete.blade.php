@@ -12,14 +12,14 @@
             <a href="{{ route('profile.edit') }}" class="nav-item nav-link">
               アカウント設定
             </a>
-            <a href="/user" class="nav-item nav-link">ユーザー管理</a>
+            <a href="{{ route('users.index') }}" class="nav-item nav-link">ユーザー管理</a>
             <a href="{{ route('logout') }}" class="nav-item nav-link">ログアウト</a>
           </nav>
         </div>
       </div>
     </header>
     
-    <div class="container-fruid pading-content">
+    <div class="container-fluid pading-content">
         @yield('content')
     </div>
         

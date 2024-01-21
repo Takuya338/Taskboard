@@ -79,18 +79,3 @@ function taskboard_delete(id) {
     //window.location.href = "taskboard_delete_done.html";
     window.location.href = "/taskboards/" + id + "/delete";
 }
-
-///////////////////////////////////////////////////
-//
-//  ユーザー削除処理
-//
-//  引数：id 削除するユーザーのID
-//
-//  戻り値：なし
-//
-//
-////////////////////////////////////////////////////
-function user_delete() {
-    // ユーザー削除完了ページへ遷移
-    window.location.href = "user_delete_done.html";
-}

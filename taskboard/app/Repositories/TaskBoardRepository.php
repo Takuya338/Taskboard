@@ -116,6 +116,22 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
             ->toArray();
         return changeEloquentToArray($results);
     }
+ 
+    /*
+    * ユーザーの利用タスクボード一覧を取得する
+    * @param int $id
+    * @return array
+    */
+    public function getTaskboardsByUserId($id) {
+        $results = DB::table('taskboard_user as tbu')
+            ->leftJoin('users as u', 'tbu.userId', '=', 'u.userId')
+            ->where('tbu.userId', $id)
+            ->select('tbu.taskboardId')
+            ->get()
+            ->toArray();
+        return changeEloquentToArray($results);
+    } 
+    
 
     /*
     * タスクボードの利用者を新規作成または更新する
@@ -162,15 +178,72 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     } 
     
     /*
+    * タスクボードの利用者を新規作成または更新する
+    * @param int $id
+    * @param array $data
+    * @return array
+    */
+    public function createOrUpdateUserTaskboards($id, array $data) {
+        // ログインしているユーザーIDを取得する
+        $loginId = $this->getLoguinUserId();
+
+        $taskboardUsers = array();
+
+        foreach($data as $taskboardId)
+        {
+            // 既にデータベースに登録されているかどうかの判定
+            $count = TaskboardUser::where('taskboardId', $taskboardId)
+               ->where('userId', $id)
+               ->count();
+                       
+            if($count == 0) {
+                // 登録
+                $taskboardUser = new TaskboardUser();
+                $taskboardUser->userId = $id;
+                $taskboardUser->taskboardId = $taskboardId;
+                $taskboardUser->creatorId = $loginId;
+                $taskboardUser->updaterId = $loginId;
+                $taskboardUser->save();
+            } else {
+                // 更新
+                $taskboardUser = TaskboardUser::where('userId' ,$id)->where('taskboardId', $taskboardId)->first();
+                $taskboardUser->userId = $id;
+                $taskboardUser->taskboardId = $taskboardId;
+                $taskboardUser->updaterId = $loginId;
+                $taskboardUser->save();
+
+            }
+            
+            // 登録結果を配列に格納
+            $taskboardUsers[] = $taskboardUser->toArray();
+        }
+
+        return changeEloquentToArray($taskboardUser);
+    } 
+    
+    /*
     * タスクボードの利用者を削除する
     * @param int $id
     * @return true
     */
     public function deleteTaskboardUsers($id, array $data = null) {
-        if($data == null) {
+        if($data != null) {
             return TaskboardUser::where('taskboardId', $id)->whereIn('userId', $data)->delete();
         } else {
             return TaskboardUser::where('taskboardId', $id)->delete(); 
+        }
+    }
+    
+    /*
+    * ユーザーの利用タスクボードを削除する
+    * @param int $id
+    * @return true
+    */
+    public function deleteUserTaskboards($id, array $data = null) {
+        if($data != null) {
+            return TaskboardUser::where('userId', $id)->whereIn('taskboardId', $data)->delete();
+        } else {
+            return TaskboardUser::where('userId', $id)->delete(); 
         }
     }
 
@@ -201,11 +274,17 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     */
     public function updateTask($id, array $data) {
         $task = Task::find($id);
-        $task->taskboard_id = $id;
-        $task->content   = $data['content'];
-        $task->status    = $data['status'];
-        $task->user_id   = $data['userId'];
-        $task->updater_id = $this->getLoguinUserId();
+        $task->taskboardId = $id;
+        if(isset($data['content'])) {
+            $task->content = $data['content'];
+        }
+        if(isset($data['taskStatus'])) {
+            $task->taskStatus = $data['taskStatus'];  
+        }
+        if(isset($data['userId'])) {
+            $task->executorId = $data['userId'];
+        }
+        $task->updaterId = $this->getLoguinUserId();
         $task->save();
         return $task->toArray();
     }
@@ -220,7 +299,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
             ->leftJoin('taskboard as tb', 't.taskboardId', '=', 'tb.taskboardId')
             ->leftJoin('users as u', 'u.userId', '=', 't.executorId')
             ->where('t.taskboardId', $id)
-            ->select('t.taskId', 't.content', 'u.name', 't.updated_at', 't.taskStatus')
+            ->select('t.taskId', 't.content', 'u.userId', 'u.name', 't.updated_at', 't.taskStatus')
             ->get()
             ->toArray();
         return changeEloquentToArray($results);

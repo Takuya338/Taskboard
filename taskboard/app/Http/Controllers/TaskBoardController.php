@@ -34,28 +34,8 @@ class TaskBoardController extends Controller
         {
             $search = $request->search;
         }
-        
-        $taskboardList = $this->taskboardService->getTaskboardList($search);
-
-        // 日時を日付表記に変更
-        $taskboards = array();
-        foreach($taskboardList as $taskboard)
-        {
-            $board = array();
-            
-            $board[] = $taskboard[0];
-            $board[] = $taskboard[1];
-            $board[] = $taskboard[2];
-           
-            // strtotimeを使用してタイムスタンプに変換
-            $timestamp = strtotime($taskboard[3]);
-            
-            // タイムスタンプを年月日の形式で出力
-            $board[] = date("Y年m月d日", $timestamp);
-            
-            $taskboards[] = $board;
-            
-        }
+        // タスクボードの一覧取得        
+        $taskboards = $this->taskboardService->getTaskboardList($search);
 
         return view('taskboards.index', compact('taskboards'));
     }
@@ -92,6 +72,7 @@ class TaskBoardController extends Controller
         // タスクボードの利用者作成
         $taskboardUsers = $this->taskboardService->createOrUpdateTaskboardUsers($taskboardId, $users);
        
+        // 登録完了ページの表示
         $data = [
             'message' => '登録完了しました。',
             'link' => 'taskboards.index',
@@ -188,9 +169,6 @@ class TaskBoardController extends Controller
         // タスクを取得
         $tasks = $this->taskboardService->getTaskboardTasks($id);
 
-        // ユーザー一覧を取得
-        $users = $this->userService->getUserList('');
-
-        return view('taskboards.taskboard', compact('taskboard', 'userList', 'userName', 'tasks', 'users'));
+        return view('taskboards.taskboard', compact('taskboard', 'userArray', 'userName', 'tasks'));
     } 
 }

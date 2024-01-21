@@ -52,10 +52,10 @@ class UserRepository implements UserRepositoryInterface {
                 if (isset($data['password'])) {
                     $user->password = $this->hashWord($data['password']);
                 }
-                $user->user_type = $data['user_type'];
-                $user->user_status = config('code.user.status.first');
-                $user->create_id = $this->getLoguinUserId();
-                $user->update_id = $this->getLoguinUserId();
+                $user->userType = $data['user_type'];
+                $user->userStatus = config('code.user.status.first');
+                $user->creatorId = $this->getLoguinUserId();
+                $user->updaterId = $this->getLoguinUserId();
                 $user->save();
                 return $user->toArray();
         } catch (Exception $e) {
@@ -87,18 +87,18 @@ class UserRepository implements UserRepositoryInterface {
                     $user->name = $data['name'];
                 }
                 if(isset($data['email'])) {
-                    $user->name = $data['email'];
+                    $user->email = $data['email'];
                 }
                 if (isset($data['password'])) {
                     $user->password = $this->hashWord($data['password']);
                 }
-                if(isset($data['user_type'])) {
-                    $user->user_type = $data['user_type'];
+                if(isset($data['userType'])) {
+                    $user->userType = $data['user_type'];
                 }
-                if(isset($data['user_status'])) {
-                    $user->user_status = $data['user_status'];
+                if(isset($data['userStatus'])) {
+                    $user->userStatus = $data['user_status'];
                 }
-                $user->update_id = $this->getLoguinUserId();
+                $user->updaterId = $this->getLoguinUserId();
                 $user->save();
                 return $user->toArray();
         } catch (Exception $e) {
@@ -117,7 +117,7 @@ class UserRepository implements UserRepositoryInterface {
                 $user = User::find($id);
                 // ユーザーのメールアドレスを待避するために取得
                 $email = $user->email;
-                $user->update($id, ['user_status' => config('code.user.status.delete'), 'email' => 'delete', 'updator_id' => $this->getLoguinUserId()]);
+                $user->update(['userStatus' => config('code.user.status.delete'), 'email' => $id . '@delete.com', 'updatorId' => $this->getLoguinUserId()]);
                 $deletedUser = $user->toArray();
                 // ユーザーのメールアドレスを待避
                 $deletedUser['email'] = $email;

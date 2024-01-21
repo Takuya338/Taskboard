@@ -7,7 +7,7 @@ return [
             'todo' => 0,             // 実行前
             'doing' => 1,            // 実行中
             'done' => 2,             // 終了
-            'cancel' => -1,          // 中止
+            'cancel' => 9,          // 中止
         ],
         'status_jp' => [
             'todo' => '実行前',      // 実行前

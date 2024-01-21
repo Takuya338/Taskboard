@@ -10,7 +10,7 @@ interface UserServiceInterface {
         public function getUserList($search);                     // ユーザー一覧情報を取得する
         public function createUser(array $data);                  // ユーザーの新規作成
         public function getUser($id);                             // ユーザー情報を取得する
-        public function getLoginUsr();                            // ログインしているユーザー情報を取得する
+        public function getLoginUser();                           // ログインしているユーザー情報を取得する
         public function updateUser(array $data);                  // ユーザー情報を更新する
         public function deleteUser(array $ids);                   // ユーザー情報を削除する
         public function PasswordReset($id);                       // パスワードをリセットする

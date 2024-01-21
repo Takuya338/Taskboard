@@ -5,16 +5,33 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Services\UserServiceInterface;
 
 class ProfileController extends Controller
 {
-    /**
+
+    private $UserService;
+    
+    /*
+    * コンストラクタ
+    */
+    public function __construct(UserServiceInterface $UserService)
+    {
+        $this->UserService = $UserService;
+    }
+
+    /*
      * ユーザー情報変更画面を表示します。
      */
     public function edit()
     {
-        $user = Auth::user();
-        return view('profile.edit', compact('user'));
+        $user = $this->UserService->getLoginUser();
+        
+        $data = [
+            'name' => $user['name'],
+            'email'=> $user['email'],
+        ];
+        return view('profile.edit', $data);
     }
 
     /**
@@ -22,17 +39,30 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $user = Auth::user();
-
         $request->validate([
             'name' => 'required|string|max:255',
-            // 他のバリデーションルールが必要な場合はここに追加
+            'email' => 'required|email'
         ]);
-
-        $user->name = $request->name;
-        // 他のフィールドの更新が必要な場合はここに追加
-        $user->save();
-
-        return redirect()->route('profile.edit')->with('success', 'プロファイルが更新されました。');
+        
+        // ユーザー情報の更新
+        $flag = $this->UserService->updateUser([
+            'name'  => $request->name,
+            'email' => $request->email
+        ]);
+    
+        if($flag) {
+            $message = '更新完了しました。';
+        } else {
+            $message = '更新失敗しました。';
+        }
+        
+        // 更新完了ページの表示
+        $data = [
+            'message' => $message,
+            'link' => 'taskboards.index',
+            'button' => 'タスクボード一覧ページ'
+        ];
+        
+        return view('base.complete', $data);
     }
 }
