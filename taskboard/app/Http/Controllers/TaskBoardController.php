@@ -87,6 +87,11 @@ class TaskBoardController extends Controller
      */
     public function edit($id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id)) {
+            return $this->hidden();
+        }
+        
         // タスクボード情報を取得
         $board = $this->taskboardService->getTaskboard($id);
         $taskboard = $board[0];
@@ -108,6 +113,11 @@ class TaskBoardController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合
+        if(!$this->taskboarService->judgeLoginUserTaskboard($id)) {
+            return $this->hidden();
+        }
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'list' => 'required|array',
@@ -137,6 +147,11 @@ class TaskBoardController extends Controller
      */
     public function destroy($id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id)) {
+            return $this->hidden();
+        }
+        
         // タスクボードの削除;
         $taskboard = $this->taskboardService->deleteTaskboard([$id]);
 
@@ -154,6 +169,11 @@ class TaskBoardController extends Controller
      */
     public function show($id)
     {    
+        // ログインしているユーザーがタスクボードの利用者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id)) {
+            return $this->hidden();
+        }
+        
         // タスクボード情報を取得
         $board = $this->taskboardService->getTaskboard($id);
         $taskboard = $board[0];
@@ -170,5 +190,19 @@ class TaskBoardController extends Controller
         $tasks = $this->taskboardService->getTaskboardTasks($id);
 
         return view('taskboards.taskboard', compact('taskboard', 'userArray', 'userName', 'tasks'));
-    } 
+    }
+    
+    /*
+    * 禁止ページの表示
+    */
+    public function hidden()
+    {
+        $data = [
+            'message' => 'このページは許可されていないページです。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボードページ'
+        ];
+
+        return view('base.complete', $data);
+    }
 }

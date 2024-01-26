@@ -11,6 +11,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Services\UserServiceInterface;
+use App\Mail\PasswordMailable;
 
 class UserService implements UserServiceInterface {
 
@@ -207,7 +208,17 @@ class UserService implements UserServiceInterface {
     * @return bool
     */
     public function sendPassword($user, $password) {
-        return $this->sendMail($user, 'password');
+        try {
+            $mailable = new PasswordMailable($password);
+            Mail::to($user['email'])->send($mailable);
+            // 成功時
+            return true;
+        } catch (Exception $e) {    
+            // 失敗時
+            return false;
+        }
+        
+        
     }
 
     /*
@@ -247,11 +258,11 @@ class UserService implements UserServiceInterface {
     public function sendMail($user, $type) {
         /*try {
                 // タイトル取得
-                $subject = config('mail.subject.'. $type);
-            
+                $subject = config('code.mail.subject.'. $type);
+ 
                 // メール送信
-                Mail::send('emails.template'. $type, ['user' => $user], function($message) use ($user) {
-                    $message->to($user['email'], $user['name'])->subject($subject);
+                Mail::send('emails.template.'. $type, ['user' => $user], function($message) use ($user) {
+                    $message->to($user['email'], $user['name'])->subject("メールテスト");
                 });
                 return true;
         } catch (Exception $e) {
@@ -259,6 +270,15 @@ class UserService implements UserServiceInterface {
                 return false;
         }*/
         return true;
+    }
+    
+    /*
+    * ログインしているユーザーが管理者かどうかの判定
+    * @retrun bool
+    */
+    public function judgeUserAdmin() {
+        $type = $this->userRepository->getLoginUserType();
+        return $type == config('user.type.admin');
     }
     
 }

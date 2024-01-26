@@ -22,4 +22,5 @@ interface TaskboardServiceInterface {
     public function createTaskboardTask($id, array $data);              // タスクボードに紐づくタスクの新規作成
     public function updateTaskboardTask($id, array $data);              // タスクボードに紐づくタスク情報を更新する
     public function deleteTaskboardTask($id, array $ids);               // タスクボードに紐づくタスク情報を削除する
+    public function judgeLoginUserTaskboard($taskboardId);              // ログインしているユーザーがタスクボードを利用しているかどうかを判定する
 }

@@ -21,4 +21,5 @@ interface TaskBoardRepositoryInterface
     public function createTask($id, array $data);                            // タスクを新規作成する
     public function updateTask($id, array $data);                            // タスクを更新する
     public function getTaskByTaskboardId($id);                               // タスクボードのタスク一覧を取得する
+    public function  getUserTaskboard($taskboardId);                         // タスクボードの利用者の中にがログインしているユーザーが含まれているかどうかの判定
 }

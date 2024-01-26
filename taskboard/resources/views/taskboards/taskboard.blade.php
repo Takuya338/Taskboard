@@ -114,8 +114,6 @@
               // タスク状態
               var taskStatus = line[1];
               
-              alert('移動したカード: ' + taskStatus);
-              
               // タスク状態変更
               window.location.href = taskboardId + "/user/" + userId + "/tasks/" +  taskId + "/status/" + taskStatus;
             });

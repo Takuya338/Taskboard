@@ -39,7 +39,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
                 ->join('users', 'taskboard.updaterId', '=', 'users.userId')
                 ->select('taskboard.taskboardId', 'taskboard.taskboardName', 'users.name', 'taskboard.updated_at')
                 ->where('taskboardName', 'like', '%' . $search . '%')
-                ->where('taskboard.updaterId', '=', $this->getLoguinUserId())
+                ->where('taskboard.updaterId', '=', $this->getLoginUserId())
                 ->orderBy('taskboard.updated_at', 'desc')
                 ->get()
                 ->toArray();
@@ -56,8 +56,8 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     public function createTaskboard($data) {
         $taskboard = new Taskboard();
         $taskboard->taskboardName = $data[0];
-        $taskboard->creatorId = $this->getLoguinUserId();
-        $taskboard->updaterId = $this->getLoguinUserId();
+        $taskboard->creatorId = $this->getLoginUserId();
+        $taskboard->updaterId = $this->getLoginUserId();
         $taskboard->save();
         return $taskboard->toArray();
     }
@@ -86,7 +86,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     public function updateTaskboard($data) {
         $taskboard = Taskboard::find($data[0]);
         $taskboard->taskboardName = $data[1];
-        $taskboard->updaterId = $this->getLoguinUserId();
+        $taskboard->updaterId = $this->getLoginUserId();
         $taskboard->save();
         return $taskboard->toArray();
     }
@@ -141,7 +141,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     */
     public function createOrUpdateTaskboardUsers($id, array $data) {
         // ログインしているユーザーIDを取得する
-        $loginId = $this->getLoguinUserId();
+        $loginId = $this->getLoginUserId();
 
         $taskboardUsers = array();
 
@@ -185,7 +185,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     */
     public function createOrUpdateUserTaskboards($id, array $data) {
         // ログインしているユーザーIDを取得する
-        $loginId = $this->getLoguinUserId();
+        $loginId = $this->getLoginUserId();
 
         $taskboardUsers = array();
 
@@ -255,7 +255,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     */
     public function createTask($id, array $data) {
         $task = new Task();
-        $loginId = $this->getLoguinUserId();
+        $loginId = $this->getLoginUserId();
         $task->taskboardId = $id;
         $task->content    = $data['content'];
         $task->taskStatus = config('code.taskboard.status.todo');
@@ -274,7 +274,6 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     */
     public function updateTask($id, array $data) {
         $task = Task::find($id);
-        $task->taskboardId = $id;
         if(isset($data['content'])) {
             $task->content = $data['content'];
         }
@@ -284,7 +283,7 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
         if(isset($data['userId'])) {
             $task->executorId = $data['userId'];
         }
-        $task->updaterId = $this->getLoguinUserId();
+        $task->updaterId = $this->getLoginUserId();
         $task->save();
         return $task->toArray();
     }
@@ -309,8 +308,24 @@ class TaskBoardRepository implements TaskBoardRepositoryInterface {
     * ログインしているユーザーのIDを取得する
     * @return int
     */ 
-    public function getLoguinUserId() {
+    public function getLoginUserId() {
         return Auth::user()->userId;
+    }
+    
+    /*
+    * タスクボードの利用者の中にがログインしているユーザーが含まれているかどうかを判定
+    * @param int $taskboardId
+    * @return bool
+    */ 
+    public function getUserTaskboard($taskboardId) {
+        // ユーザーIDを取得
+        $id = $this->getLoginUserId();
+        
+        // タスクボードにユーザーが紐づけられているかどうかを調べる
+        return  DB::table('taskboard_user')
+        ->where('taskboardId', $taskboardId)
+        ->where('userId', $id)
+        ->count();
     }
 
 }

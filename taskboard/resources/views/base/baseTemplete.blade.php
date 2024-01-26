@@ -12,7 +12,9 @@
             <a href="{{ route('profile.edit') }}" class="nav-item nav-link">
               アカウント設定
             </a>
+            @if(Auth::user()->userType == config('user.type.admin'))
             <a href="{{ route('users.index') }}" class="nav-item nav-link">ユーザー管理</a>
+            @endif
             <a href="{{ route('logout') }}" class="nav-item nav-link">ログアウト</a>
           </nav>
         </div>

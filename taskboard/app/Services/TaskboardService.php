@@ -199,7 +199,16 @@ class TaskboardService implements TaskboardServiceInterface {
     * @param array $data
     * @return array
     */
-    public function deleteTaskboardTask($id, array $ids) {}             
+    public function deleteTaskboardTask($id, array $ids) {} 
+    
+    /*
+    * ログインしているユーザーがタスクボードを利用しているかどうかを判定す
+    * @return bool
+    */
+    public function judgeLoginUserTaskboard($taskboardId) {
+        $count = $this->taskboardRepository->getUserTaskboard($taskboardId);
+        return $count == 1;
+    }
 
 
 }

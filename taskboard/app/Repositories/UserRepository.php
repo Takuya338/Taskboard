@@ -54,8 +54,8 @@ class UserRepository implements UserRepositoryInterface {
                 }
                 $user->userType = $data['user_type'];
                 $user->userStatus = config('code.user.status.first');
-                $user->creatorId = $this->getLoguinUserId();
-                $user->updaterId = $this->getLoguinUserId();
+                $user->creatorId = $this->getLoginUserId();
+                $user->updaterId = $this->getLoginUserId();
                 $user->save();
                 return $user->toArray();
         } catch (Exception $e) {
@@ -98,7 +98,7 @@ class UserRepository implements UserRepositoryInterface {
                 if(isset($data['userStatus'])) {
                     $user->userStatus = $data['user_status'];
                 }
-                $user->updaterId = $this->getLoguinUserId();
+                $user->updaterId = $this->getLoginUserId();
                 $user->save();
                 return $user->toArray();
         } catch (Exception $e) {
@@ -117,7 +117,7 @@ class UserRepository implements UserRepositoryInterface {
                 $user = User::find($id);
                 // ユーザーのメールアドレスを待避するために取得
                 $email = $user->email;
-                $user->update(['userStatus' => config('code.user.status.delete'), 'email' => $id . '@delete.com', 'updatorId' => $this->getLoguinUserId()]);
+                $user->update(['userStatus' => config('code.user.status.delete'), 'email' => $id . '@delete.com', 'updatorId' => $this->getLoginUserId()]);
                 $deletedUser = $user->toArray();
                 // ユーザーのメールアドレスを待避
                 $deletedUser['email'] = $email;
@@ -153,7 +153,7 @@ class UserRepository implements UserRepositoryInterface {
     * ログインしているユーザーIDを取得する
     * @return int ログインしているユーザーID
     */
-    public function getLoguinUserId() {
+    public function getLoginUserId() {
         return Auth::id();
     }
 
@@ -169,7 +169,7 @@ class UserRepository implements UserRepositoryInterface {
             $status = 9;
             
             // ログインしているユーザーID
-            $loginUserId = $this->getLoguinUserId();
+            $loginUserId = $this->getLoginUserId();
             
             // ユーザーIDが指定されていない場合はログインユーザーのIDを取得
             if($id == null) {
@@ -187,5 +187,25 @@ class UserRepository implements UserRepositoryInterface {
             return [];
         }
     }
+    
+    /*
+    * ログインしているユーザーのタイプを取得
+    * @return int 
+    */
+    public function getLoginUserType() {
+       $user = $this->getLoginUser();
+       return $user['userType'];
+    }
+    
+    /*
+    * ログインしているユーザー情報を取得
+    * @return array
+    */
+    public function getLoginUser() {
+        $id = Auth::id();
+        $user = User::find($id);
+        return $user->toArray();
+    }
+
 
 }
