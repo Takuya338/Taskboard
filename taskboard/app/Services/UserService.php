@@ -86,7 +86,7 @@ class UserService implements UserServiceInterface {
     * @return array
     */
     public function getLoginUser() {
-        $id = $this->userRepository->getLoguinUserId();
+        $id = $this->userRepository->getLoginUserId();
         return $this->getUser($id);
     }
 
@@ -98,17 +98,17 @@ class UserService implements UserServiceInterface {
     public function updateUser(array $data) {
         try {
             
-            $id = $this->userRepository->getLoguinUserId();
+            $id = $this->userRepository->getLoginUserId();
             
             // ユーザーIDが存在する場合はそのIDとする
             if(isset($data['id'])) {
                 $id = $data['id'];
                 unset($data['id']);
             }
-            
+
             // ユーザー情報を更新
             $user = $this->userRepository->updateUser($id, $data);
-                
+            
             if(empty($user)) {
                 // ユーザー情報の更新に失敗した場合
                 return [];
@@ -278,7 +278,7 @@ class UserService implements UserServiceInterface {
     */
     public function judgeUserAdmin() {
         $type = $this->userRepository->getLoginUserType();
-        return $type == config('user.type.admin');
+        return $type == config('code.user.type.admin');
     }
     
 }

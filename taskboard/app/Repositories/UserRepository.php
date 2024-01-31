@@ -23,7 +23,7 @@ class UserRepository implements UserRepositoryInterface {
     */
     public function searchUser($search) {
         $users = User::where('name', 'like', "%" . $search ."%")
-            ->where('userStatus', '!=', -1)
+            ->where('userStatus', '!=', config('code.user.status.delete'))
             ->orWhere('email', 'like', "%" . $search . "%")
             ->where('userStatus', '!=', config('code.user.status.delete'))
             ->orderBy('userId', 'asc')
@@ -92,10 +92,10 @@ class UserRepository implements UserRepositoryInterface {
                 if (isset($data['password'])) {
                     $user->password = $this->hashWord($data['password']);
                 }
-                if(isset($data['userType'])) {
+                if(isset($data['user_type'])) {
                     $user->userType = $data['user_type'];
                 }
-                if(isset($data['userStatus'])) {
+                if(isset($data['user_status'])) {
                     $user->userStatus = $data['user_status'];
                 }
                 $user->updaterId = $this->getLoginUserId();
@@ -137,7 +137,7 @@ class UserRepository implements UserRepositoryInterface {
     public function getUserByEmail($email) {
 
         $user = User::where('email', $email)->first();
-        return $user->user_id;
+        return $user->userId;
     }
 
     /*

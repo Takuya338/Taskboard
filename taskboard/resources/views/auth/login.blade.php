@@ -8,7 +8,6 @@
 			</div>
 
 			<form method="post" action="{{ route('login') }}">
-				@csrf
 				<!--メールアドレス入力フォーム-->
 				<div class="form-group">
 					<label for="email">メールアドレス</label>

@@ -25,6 +25,11 @@ class TaskController extends Controller
     */
     public function create($id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
         // ユーザー一覧取得
         $users = $this->taskboardService->getTaskboardUsers($id);
         
@@ -40,6 +45,11 @@ class TaskController extends Controller
     */
     public function store(Request $request, $id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
         // バリデーション
         $request->validate([
             'content' => 'required|max:255',
@@ -70,6 +80,11 @@ class TaskController extends Controller
     */
     public function updateStatus($taskboardId, $userId, $taskId, $taskStatus)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($taskboardId) && !$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
         // タスク状態変更
         $task = $this->taskboardService->updateTaskboardTask($taskId, [
             'userId' => $userId,
@@ -79,6 +94,20 @@ class TaskController extends Controller
         
         // タスクボードページへ遷移
         return redirect()->route('board', ['id' => $taskboardId]);
+    }
+    
+    /*
+    * 禁止ページの表示
+    */
+    public function hidden()
+    {
+        $data = [
+            'message' => 'このページは許可されていないページです。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボードページ'
+        ];
+
+        return view('base.complete', $data);
     }
 
 }

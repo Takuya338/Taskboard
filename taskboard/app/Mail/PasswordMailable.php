@@ -20,7 +20,7 @@ class PasswordMailable extends Mailable
 
     public function build()
     {
-        return $this->view('emails.template.password')
+        return $this->view('emails.templatcd e.password')
                     ->with(['password' => $this->password]);
     }
 }

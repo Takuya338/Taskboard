@@ -29,6 +29,12 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        // 管理者でない場合は禁止ページを表示
+        if(!$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
+        
         $search = "";
         // 検索値
         if(isset($request->search))
@@ -51,7 +57,8 @@ class UserController extends Controller
         
         $data = [
             'datas' => $userList,
-            'search' => $search
+            'search' => $search,
+            'admin' => true,
         ];
         return view('users.index', $data);
     }
@@ -61,6 +68,11 @@ class UserController extends Controller
      */
     public function create()
     {
+        // 管理者でない場合は禁止ページを表示
+        if(!$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
         // ユーザータイプを取得
         $userTypes =  getUserTypeCodeArray();
         
@@ -92,6 +104,12 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // 管理者でない場合は禁止ページを表示
+        if(!$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
+        
         // 入力値のチェック
         $request->validate([
             'name' => 'required|string|max:255',
@@ -135,6 +153,12 @@ class UserController extends Controller
      */
     public function edit($id)
     {
+        // 管理者でない場合は禁止ページを表示
+        if(!$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
+        
         // ユーザータイプを取得
         $userTypes =  getUserTypeCodeArray();
         
@@ -186,6 +210,12 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // 管理者でない場合は禁止ページを表示
+        if(!$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
+        
         // 入力値のチェック
         $request->validate([
             'name' => 'required|string|max:255',
@@ -205,7 +235,6 @@ class UserController extends Controller
         // 利用するタスクボードを更新
         $taskboardUsers = $request->taskboardUsers;
         $taskboard = $this->taskboardService->createOrUpdateuserTaskboards($id, $taskboardUsers);
-        
         // 完了ページのメッセージ表示 
         if(!empty($user) && !empty($taskboard)) {
             // 成功
@@ -229,6 +258,11 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+       // 管理者でない場合は禁止ページを表示
+       if(!$this->userService->judgeUserAdmin()) {
+            return false;
+       }
+       
        // ユーザー削除処理
        return $this->userDelete([$id]);
     }
@@ -238,6 +272,11 @@ class UserController extends Controller
      */
     public function deletes(Request $request)
     {
+       // 管理者でない場合は禁止ページを表示
+       if(!$this->userService->judgeUserAdmin()) {
+            return false;
+       }
+       
        // 削除するユーザー
        $userList = $request->alls;
         
@@ -250,7 +289,12 @@ class UserController extends Controller
      */
     public function userDelete(array $ids)
     {
-       // 削除処理
+        // 管理者でない場合は禁止ページを表示
+        if(!$this->userService->judgeUserAdmin()) {
+            return false;
+        }
+        
+        // 削除処理
         $flag = $this->userService->deleteUSer($ids);
         
         // 完了ページのメッセージ表示 
@@ -269,5 +313,19 @@ class UserController extends Controller
             'button' => 'ユーザー一覧ページ'
         ];
         return view('base.complete', $data); 
+    }
+    
+    /*
+    * 禁止ページの表示
+    */
+    public function hidden()
+    {
+        $data = [
+            'message' => 'このページは許可されていないページです。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボードページ'
+        ];
+
+        return view('base.complete', $data);
     }
 }

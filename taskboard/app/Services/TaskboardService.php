@@ -118,7 +118,7 @@ class TaskboardService implements TaskboardServiceInterface {
     * ユーザーに紐づくタスクボード情報を作成または更新する
     * @param  int $id
     * @param  array $data 
-    * @return array
+    * @return bool
     */
     public function createOrUpdateUserTaskboards($id, array $data) {
         
@@ -141,7 +141,7 @@ class TaskboardService implements TaskboardServiceInterface {
         // タスクボード情報を作成・更新
         $result[] = $this->taskboardRepository->createOrUpdateUserTaskboards($id, $data);
 
-        return $result;
+        return $result[1] && $result[2];
     }
 
     /*
@@ -206,6 +206,7 @@ class TaskboardService implements TaskboardServiceInterface {
     * @return bool
     */
     public function judgeLoginUserTaskboard($taskboardId) {
+        
         $count = $this->taskboardRepository->getUserTaskboard($taskboardId);
         return $count == 1;
     }

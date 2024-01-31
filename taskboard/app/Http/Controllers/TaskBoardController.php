@@ -87,8 +87,8 @@ class TaskBoardController extends Controller
      */
     public function edit($id)
     {
-        // ログインしているユーザーがタスクボードの利用者でない場合
-        if(!$this->taskboardService->judgeLoginUserTaskboard($id)) {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
             return $this->hidden();
         }
         
@@ -113,8 +113,8 @@ class TaskBoardController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // ログインしているユーザーがタスクボードの利用者でない場合
-        if(!$this->taskboarService->judgeLoginUserTaskboard($id)) {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
             return $this->hidden();
         }
         
@@ -147,8 +147,8 @@ class TaskBoardController extends Controller
      */
     public function destroy($id)
     {
-        // ログインしているユーザーがタスクボードの利用者でない場合
-        if(!$this->taskboardService->judgeLoginUserTaskboard($id)) {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
             return $this->hidden();
         }
         
@@ -169,8 +169,8 @@ class TaskBoardController extends Controller
      */
     public function show($id)
     {    
-        // ログインしているユーザーがタスクボードの利用者でない場合
-        if(!$this->taskboardService->judgeLoginUserTaskboard($id)) {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
             return $this->hidden();
         }
         
