@@ -22,14 +22,15 @@ Route::middleware(['auth'])->group(function () {
 
     // ユーザー管理
     Route::resource('users', UserController::class);
-    Route::delete('users/{id}/delete', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::post('users/{id}/password/reset', [PasswordController::class, 'reset'])->name('users.password.reset');
+    Route::get('users/{id}/delete', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::post('users/deletes', [UserController::class, 'deletes'])->name('users.deletes');
+    Route::get('users/{id}/password/reset', [PasswordController::class, 'reset'])->name('users.password.reset');
 
     // ログイン情報変更
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/edit', [ProfileController::class, 'update']);
+    Route::post('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/password/change', [PasswordController::class, 'change'])->name('password.change');
-    Route::put('/password/change', [PasswordController::class, 'update']);
+    Route::post('/password/change', [PasswordController::class, 'update'])->name('password.update');
 
     // タスクボード管理
     Route::resource('taskboards', TaskBoardController::class);
@@ -41,21 +42,14 @@ Route::middleware(['auth'])->group(function () {
     // タスク管理
     Route::get('taskboards/{id}/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('taskboards/{id}/tasks/create', [TaskController::class, 'store'])->name('tasks.store');
-    Route::patch('taskboards/{id}/tasks/{taskId}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+    Route::get('taskboards/{taskboardId}/user/{userId}/tasks/{taskId}/status/{taskStatus}', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
 });
 
                                          
 
 // testページへ遷移
 Route::get('test', function () {
-    /*$data = [
-        'page_title' => 'テストページ',
-        'centence' => 'これはテストを行うページです。',
-        'button_url' => '/taskboard/create/comfirm',
-        'button_name' => '確認',
-    ];*/
-    // return view('templetes.done',$data);
     //return view('top');
-    return view('taskboard');
+    return view('taskboards.newtaskboard');
 });
 

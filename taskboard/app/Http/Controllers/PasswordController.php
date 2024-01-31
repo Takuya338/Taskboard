@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\UserServiceInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -10,7 +11,18 @@ use App\Mail\PasswordResetMail; // 作成するメールクラス
 
 class PasswordController extends Controller
 {
-    /**
+    
+    private $UserService;
+    
+    /*
+    * コンストラクタ
+    */
+    public function __construct(UserServiceInterface $UserService)
+    {
+        $this->UserService = $UserService;
+    }
+      
+    /** 
      * パスワード変更画面を表示します。
      */
     public function change()
@@ -24,43 +36,54 @@ class PasswordController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|string|min:8|confirmed',
+            'password' => 'required',
+            'password2' => 'required|same:password',
         ]);
-
-        $user = Auth::user();
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => '現在のパスワードが正しくありません。']);
+        
+        // パスワード更新処理
+        $flag = $this->UserService->changePassword($request->password);
+        
+        
+        if($flag) {
+            $data = [
+            'message' => 'パスワード更新完了しました。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボード一覧ページ'
+            ];
+        } else {
+            $data = [
+            'message' => 'パスワードが更新されませんでした。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボード一覧ページ'
+            ];
         }
 
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return redirect()->route('password.change')->with('success', 'パスワードが変更されました。');
+        return view('base.complete', $data);
     }
 
     /**
      * パスワードの再発行を処理します。
      */
-    public function reset(Request $request, $id)
+    public function reset($id)
     {
-        // 対象のユーザーを取得
-        $user = User::find($id);
-        if (!$user) {
-            return back()->withErrors(['error' => 'ユーザーが見つかりません。']);
+       // パスワード更新処理
+        $flag = $this->UserService->PasswordReset($id);
+        
+        
+        if($flag) {
+            $data = [
+            'message' => 'パスワード更新完了しました。',
+            'link' => 'users.index',
+            'button' => 'タスクボード一覧ページ'
+            ];
+        } else {
+            $data = [
+            'message' => 'パスワードが更新されませんでした。',
+            'link' => 'users.index',
+            'button' => 'タスクボード一覧ページ'
+            ];
         }
 
-        // 新しいランダムパスワードを生成
-        $newPassword = \Str::random(10);
-
-        // ユーザーのパスワードを更新
-        $user->password = Hash::make($newPassword);
-        $user->save();
-
-        // パスワード再発行用のメールを送信
-        Mail::to($user->email)->send(new PasswordResetMail($newPassword));
-
-        return back()->with('success', '新しいパスワードをユーザーのメールアドレスに送信しました。');
+        return view('base.complete', $data);
     }
 }

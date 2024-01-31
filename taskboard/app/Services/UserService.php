@@ -9,7 +9,9 @@ namespace App\Services;
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Services\UserServiceInterface;
+use App\Mail\PasswordMailable;
 
 class UserService implements UserServiceInterface {
 
@@ -49,19 +51,23 @@ class UserService implements UserServiceInterface {
 
             if(empty($user)) {
                 // ユーザー作成に失敗した場合
-                return false;
+                return [];
             }
         
             // ユーザーに登録完了メールを送信
-            if(!$this->sendRegisterMail($user, $data['password'])) {
-                return false;
+            $flag = $this->sendRegisterMail($user, $data['password']);
+            
+            if($flag) {
+                // 成功時
+                return $user;
+            } else {
+                // 失敗時
+                return [];
             }
-
-            return true;
 
         } catch (Exception $e) {
             // ユーザー作成に失敗した場合
-            return false;
+            return [];
         }
         
     }
@@ -74,6 +80,15 @@ class UserService implements UserServiceInterface {
     public function getUser($id) {
         return $this->userRepository->getUserById($id);
     }
+    
+    /*
+    * ログインしているユーザー情報を取得する
+    * @return array
+    */
+    public function getLoginUser() {
+        $id = $this->userRepository->getLoginUserId();
+        return $this->getUser($id);
+    }
 
     /*
     * ユーザーの設定を更新する
@@ -82,27 +97,37 @@ class UserService implements UserServiceInterface {
     */
     public function updateUser(array $data) {
         try {
-        
-            // ユーザーIDを取得
-            $id = $data['id'];
-                
-            // ユーザーIDを削除
-            unset($data['id']);
-                
+            
+            $id = $this->userRepository->getLoginUserId();
+            
+            // ユーザーIDが存在する場合はそのIDとする
+            if(isset($data['id'])) {
+                $id = $data['id'];
+                unset($data['id']);
+            }
+
             // ユーザー情報を更新
             $user = $this->userRepository->updateUser($id, $data);
-                
+            
             if(empty($user)) {
                 // ユーザー情報の更新に失敗した場合
-                return false;
+                return [];
             }
             
             // ユーザーに更新完了メールを送信
-            return $this->sendUpdateMail($user);
+            $flag = $this->sendUpdateMail($user);
+            
+            if($flag) {
+                // 成功時
+                return $user;
+            } else {
+                // 失敗時
+                return [];
+            }
             
         } catch (Exception $e) {    
             // ユーザー情報の更新に失敗した場合
-            return false;
+            return [];
         }
     }
 
@@ -137,7 +162,7 @@ class UserService implements UserServiceInterface {
         $password = $this->makePassword();
 
         // パスワードを更新
-        $user = $this->userRepository->changePassword($id, $password);
+        $user = $this->userRepository->changePassword($password, $id);
 
         if(empty($user)) {
             // パスワードの更新に失敗した場合
@@ -166,7 +191,7 @@ class UserService implements UserServiceInterface {
 
         // パスワードを更新
         $user = $this->userRepository->changePassword($password);
-
+        
         if(empty($user)) {
             // パスワードの更新に失敗した場合
             return false;
@@ -183,7 +208,17 @@ class UserService implements UserServiceInterface {
     * @return bool
     */
     public function sendPassword($user, $password) {
-        return $this->sendMail($user, 'password');
+        try {
+            $mailable = new PasswordMailable($password);
+            Mail::to($user['email'])->send($mailable);
+            // 成功時
+            return true;
+        } catch (Exception $e) {    
+            // 失敗時
+            return false;
+        }
+        
+        
     }
 
     /*
@@ -223,11 +258,11 @@ class UserService implements UserServiceInterface {
     public function sendMail($user, $type) {
         /*try {
                 // タイトル取得
-                $subject = config('mail.subject.'. $type);
-            
+                $subject = config('code.mail.subject.'. $type);
+ 
                 // メール送信
-                Mail::send('emails.template'. $type, ['user' => $user], function($message) use ($user) {
-                    $message->to($user['email'], $user['name'])->subject($subject);
+                Mail::send('emails.template.'. $type, ['user' => $user], function($message) use ($user) {
+                    $message->to($user['email'], $user['name'])->subject("メールテスト");
                 });
                 return true;
         } catch (Exception $e) {
@@ -235,6 +270,15 @@ class UserService implements UserServiceInterface {
                 return false;
         }*/
         return true;
+    }
+    
+    /*
+    * ログインしているユーザーが管理者かどうかの判定
+    * @retrun bool
+    */
+    public function judgeUserAdmin() {
+        $type = $this->userRepository->getLoginUserType();
+        return $type == config('code.user.type.admin');
     }
     
 }

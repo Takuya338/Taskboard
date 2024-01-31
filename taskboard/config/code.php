@@ -7,7 +7,7 @@ return [
             'todo' => 0,             // 実行前
             'doing' => 1,            // 実行中
             'done' => 2,             // 終了
-            'cancel' => -1,          // 中止
+            'cancel' => 9,          // 中止
         ],
         'status_jp' => [
             'todo' => '実行前',      // 実行前
@@ -43,8 +43,7 @@ return [
             'register' => 'ユーザー登録完了',
             'update' => 'ユーザー情報の更新',
             'delete' => 'ユーザー情報の削除',
-            'reset_password' => 'パスワードのリセット',
-            'change_password' => 'パスワードの変更',
+            'password' => 'パスワードの変更',
         ],
         'template' => [
             'register' => 'emails.register',

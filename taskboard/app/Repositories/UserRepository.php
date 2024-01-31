@@ -23,7 +23,7 @@ class UserRepository implements UserRepositoryInterface {
     */
     public function searchUser($search) {
         $users = User::where('name', 'like', "%" . $search ."%")
-            ->where('userStatus', '!=', -1)
+            ->where('userStatus', '!=', config('code.user.status.delete'))
             ->orWhere('email', 'like', "%" . $search . "%")
             ->where('userStatus', '!=', config('code.user.status.delete'))
             ->orderBy('userId', 'asc')
@@ -50,12 +50,12 @@ class UserRepository implements UserRepositoryInterface {
                 $user->name = $data['name'];
                 $user->email = $data['email'];
                 if (isset($data['password'])) {
-                    $user->password = $this->hash($data['password']);
+                    $user->password = $this->hashWord($data['password']);
                 }
-                $user->user_type = $data['user_type'];
-                $user->user_status = config('code.user.status.first');
-                $user->create_id = $this->getLoguinUserId();
-                $user->update_id = $this->getLoguinUserId();
+                $user->userType = $data['user_type'];
+                $user->userStatus = config('code.user.status.first');
+                $user->creatorId = $this->getLoginUserId();
+                $user->updaterId = $this->getLoginUserId();
                 $user->save();
                 return $user->toArray();
         } catch (Exception $e) {
@@ -87,18 +87,18 @@ class UserRepository implements UserRepositoryInterface {
                     $user->name = $data['name'];
                 }
                 if(isset($data['email'])) {
-                    $user->name = $data['email'];
+                    $user->email = $data['email'];
                 }
                 if (isset($data['password'])) {
-                    $user->password = $this->hash($data['password']);
+                    $user->password = $this->hashWord($data['password']);
                 }
                 if(isset($data['user_type'])) {
-                    $user->user_type = $data['user_type'];
+                    $user->userType = $data['user_type'];
                 }
                 if(isset($data['user_status'])) {
-                    $user->user_status = $data['user_status'];
+                    $user->userStatus = $data['user_status'];
                 }
-                $user->update_id = $this->getLoguinUserId();
+                $user->updaterId = $this->getLoginUserId();
                 $user->save();
                 return $user->toArray();
         } catch (Exception $e) {
@@ -117,7 +117,7 @@ class UserRepository implements UserRepositoryInterface {
                 $user = User::find($id);
                 // ユーザーのメールアドレスを待避するために取得
                 $email = $user->email;
-                $user->update($id, ['user_status' => config('code.user.status.delete'), 'email' => 'delete', 'updator_id' => $this->getLoguinUserId()]);
+                $user->update(['userStatus' => config('code.user.status.delete'), 'email' => $id . '@delete.com', 'updatorId' => $this->getLoginUserId()]);
                 $deletedUser = $user->toArray();
                 // ユーザーのメールアドレスを待避
                 $deletedUser['email'] = $email;
@@ -137,7 +137,7 @@ class UserRepository implements UserRepositoryInterface {
     public function getUserByEmail($email) {
 
         $user = User::where('email', $email)->first();
-        return $user->user_id;
+        return $user->userId;
     }
 
     /*
@@ -153,7 +153,7 @@ class UserRepository implements UserRepositoryInterface {
     * ログインしているユーザーIDを取得する
     * @return int ログインしているユーザーID
     */
-    public function getLoguinUserId() {
+    public function getLoginUserId() {
         return Auth::id();
     }
 
@@ -169,7 +169,7 @@ class UserRepository implements UserRepositoryInterface {
             $status = 9;
             
             // ログインしているユーザーID
-            $loginUserId = $this->getLoguinUserId();
+            $loginUserId = $this->getLoginUserId();
             
             // ユーザーIDが指定されていない場合はログインユーザーのIDを取得
             if($id == null) {
@@ -177,9 +177,9 @@ class UserRepository implements UserRepositoryInterface {
                 $status = 0;
             }
             $user = User::find($id);
-            $user->password = $this->hash($password);
-            $user->update_id = $loginUserId;
-            $user->user_status = $status;
+            $user->password = $this->hashWord($password);
+            $user->updaterId = $loginUserId;
+            $user->userStatus = $status;
             $user->save();
             return $user->toArray();
         } catch (Exception $e) {
@@ -187,5 +187,25 @@ class UserRepository implements UserRepositoryInterface {
             return [];
         }
     }
+    
+    /*
+    * ログインしているユーザーのタイプを取得
+    * @return int 
+    */
+    public function getLoginUserType() {
+       $user = $this->getLoginUser();
+       return $user['userType'];
+    }
+    
+    /*
+    * ログインしているユーザー情報を取得
+    * @return array
+    */
+    public function getLoginUser() {
+        $id = Auth::id();
+        $user = User::find($id);
+        return $user->toArray();
+    }
+
 
 }

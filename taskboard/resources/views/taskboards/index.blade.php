@@ -32,7 +32,7 @@
                 <div class="text-center"><h4>{{ $taskboard[1] }}</h4></div>
               </div>
               <div class="card-footer">
-                <small>更新日:{{ $taskboard[3] }}</small><br />
+                <small>更新日:{{ arrangeDate($taskboard[3]) }}</small><br />
                 <small>更新者:{{ $taskboard[2] }}</small>
               </div>
             </div>

@@ -25,11 +25,16 @@ class TaskController extends Controller
     */
     public function create($id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
         // ユーザー一覧取得
         $users = $this->taskboardService->getTaskboardUsers($id);
         
-        $data = ['taskboadId' => $id,
-                 'datas'=>$users
+        $data = ['taskboardId' => $id,
+                 'users'=>$users
         ];
 
         return view('tasks.create', $data);
@@ -40,6 +45,11 @@ class TaskController extends Controller
     */
     public function store(Request $request, $id)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($id) && !$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
         // バリデーション
         $request->validate([
             'content' => 'required|max:255',
@@ -49,13 +59,15 @@ class TaskController extends Controller
         $task = [ 'content' => $request->content,
                   'userId'  => $request->user,
         ];
-
+    
         // タスク作成処理
         $this->taskboardService->createTaskboardTask($id, $task);
-
+        
+        // 追加完了ページの表示
         $data = [
             'message' => 'タスク追加完了しました。',
-            'link' => 'taskboards.taskboard',
+            'link' => 'board',
+            'id' => $id,
             'button' => 'タスクボードページ'
         ];
 
@@ -66,10 +78,36 @@ class TaskController extends Controller
     /*
     * タスク状態変更
     */
-    public function updateStatus(Request $request, $id, $taskId)
+    public function updateStatus($taskboardId, $userId, $taskId, $taskStatus)
     {
+        // ログインしているユーザーがタスクボードの利用者でない場合または管理者でない場合
+        if(!$this->taskboardService->judgeLoginUserTaskboard($taskboardId) && !$this->userService->judgeUserAdmin()) {
+            return $this->hidden();
+        }
+        
+        // タスク状態変更
+        $task = $this->taskboardService->updateTaskboardTask($taskId, [
+            'userId' => $userId,
+            'taskStatus' => $taskStatus
+        ]);
+        
+        
         // タスクボードページへ遷移
-        return redirect()->route('board', ['id' => $id]);
+        return redirect()->route('board', ['id' => $taskboardId]);
+    }
+    
+    /*
+    * 禁止ページの表示
+    */
+    public function hidden()
+    {
+        $data = [
+            'message' => 'このページは許可されていないページです。',
+            'link' => 'taskboards.index',
+            'button' => 'タスクボードページ'
+        ];
+
+        return view('base.complete', $data);
     }
 
 }

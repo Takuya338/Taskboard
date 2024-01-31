@@ -1,32 +1,37 @@
 {{-- resources/views/users/create.blade.php --}}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ユーザー新規作成</title>
-    {{-- スタイルシート等のリンク --}}
-</head>
-<body>
-    <h1>ユーザー新規作成</h1>
-    <form action="{{ route('users.store') }}" method="post">
-        @csrf
-        <div>
-            <label for="name">名前</label>
-            <input type="text" id="name" name="name" required>
+@extends('base.baseTemplete')
+@section('content')
+      <!--戻るボタン-->
+      @include('parts.backbutton', ['url'=>route('users.index')])
+
+      <!--タイトル行-->
+      <div class="row">
+        <!--タイトル-->
+        <div class="col-xl-4 p-3"><h2>ユーザー登録</h2></div>
+      </div>
+
+      <!--登録フォーム-->
+      <div class="row">
+        <div class="col-xl-5">
+          <form method="post" action="{{  route('users.store') }}">
+            @csrf
+            <!--名前入力フォーム-->
+            @include('form.name', ['value'=>''])
+            
+            <!--メールアドレス入力フォーム-->
+            @include('form.email', ['value'=>''])
+            
+            <!--ユーザータイプ選択フォーム-->
+            @include('form.select', ['datas'=>$userTypes,'label'=>'ユーザータイプ','name'=>'userType'])
+            
+            <!--利用タスクボード選択フォーム-->
+            @include('form.checkbox', ['name'=>'taskboardUsers', 'datas'=>$taskboards, 'label'=>'利用するタスクボード', 'selected'=>[]])
+
+            <!--登録ボタン-->
+            <div class="form-group">
+              <input type="submit" class="btn btn-success" value="登録" />
+            </div>
+          </form>
         </div>
-        <div>
-            <label for="email">メールアドレス</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div>
-            <label for="password">パスワード</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div>
-            <label for="password_confirmation">パスワード（確認）</label>
-            <input type="password" id="password_confirmation" name="password_confirmation" required>
-        </div>
-        <button type="submit">作成</button>
-    </form>
-</body>
-</html>
+      </div>
+@endsection

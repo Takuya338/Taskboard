@@ -11,7 +11,7 @@
 
         <!--タスク追加ボタン-->
         <div class="col-xl-2 p-3">
-          <a href="{{ route('', $taskboard[0]) }}"
+          <a href="{{ route('tasks.create', $taskboard[0]) }}"
             ><input type="button" class="btn btn-success" value="タスク追加"
           /></a>
         </div>
@@ -44,70 +44,83 @@
           <table class="table-bordered" width="100%">
             <thead>
               <th class="taskbord" width="8%"></th>
-              <th class="taskbord" width="23%">実行前</th>
-              <th class="taskbord" width="23%">実行中</th>
-              <th class="taskbord" width="23%">完了</th>
-              <th class="taskbord" width="23%">中止</th>
+              @foreach(config('code.taskboard.status_jp') as $status)
+                <th class="taskboard" width="23%">{{ $status }}</th> 
+              @endforeach
             </thead>
 
             <tbody>
-              <tr>
-                <td>タスク一郎</td>
-                <td class="connectedSortable">
-
-                  <div class="card p-10 bg-info" draggable="true">
-                    <div class="card-body">
-                      <p>〇〇を実行</p>
-                    </div>
-                    <div class="card-footer">
-                      <small>更新日:0000年00月00日</small><br />
-                      <small>更新者:タスク一郎</small>
-                    </div>
-                  </div>
-
-                  <div class="card p-10 bg-info" draggable="true">  
-                    <div class="card-body">
-                      <p>〇〇を実行</p>
-                    </div>
-                    <div class="card-footer">
-                      <small>更新日:0000年00月00日</small><br />
-                      <small>更新者:タスク一郎</small>
-                    </div>
-                  </div>
-
-                </td>
-                <td class="connectedSortable" dropzone="move"></td>
-                <td class="connectedSortable" dropzone="move"></td>
-                <td class="connectedSortable" dropzone="move"></td>
-              </tr>
-
-              <tr>
-                <td class="connectedSortable">タスク二郎</td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-              </tr>
-
-              <tr>
-                <td class="connectedSortable">タスク三郎</td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-              </tr>
-
-              <tr>
-                <td class="connectedSortable">タスク四郎</td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-                <td class="connectedSortable"></td>
-              </tr>
+              @foreach($userArray as $user)
+                <tr>
+                  <td id="{{ 'user-' . $user[0] }}">{{ $user[1] }}</td>
+                  @foreach(config('code.taskboard.status_jp') as $key => $value)
+                    <td id="{{ 't' . $user[0] . '-' . config('code.taskboard.status')[$key] }}" class="connectedSortable">
+                      @foreach($tasks as $task)
+                        @if($user[0] == $task[2] && config('code.taskboard.status')[$key] == $task[5])
+                          <div id="{{ 'task' . $task[0] }}" class="card p-10 bg-info" draggable="true">
+                            <div class="card-body">
+                              <p>{{ $task[1] }}</p>
+                            </div>
+                            <div class="card-footer">
+                              <small>更新日:{{ arrangeDate($task[4]) }}</small><br />
+                              <small>更新者:{{ $task[3] }}</small>
+                            </div>
+                          </div>
+                        @endif
+                      @endforeach
+                    </td>
+                  @endforeach
+                </tr>
+              @endforeach
             </tbody>
           </table>
         </div>
       </div>
+      <script>
+       document.addEventListener('DOMContentLoaded', function() {
+          // ドラッグ可能なカードを全て取得
+          var cards = document.querySelectorAll('.card');
+
+          // 各カードにドラッグイベントを設定
+          cards.forEach(function(card) {
+            card.addEventListener('dragstart', function(e) {
+              e.dataTransfer.setData('text/plain', card.id);
+            });
+          });
+
+          // ドロップゾーン（.connectedSortable）を全て取得
+          var dropzones = document.querySelectorAll('.connectedSortable');
+
+          // 各ドロップゾーンにイベントリスナーを設定
+          dropzones.forEach(function(zone) {
+            zone.addEventListener('dragover', function(e) {
+              e.preventDefault(); // デフォルトの処理をキャンセル
+          });
+
+          zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+              var cardId = e.dataTransfer.getData('text/plain');
+              var card = document.getElementById(cardId);
+              zone.appendChild(card); // カードを新しい位置に移動
+              // タスクボードID
+              var taskboardId = {{ $taskboard[0] }};
+              
+              // タスクID
+              var taskId = cardId.slice(4);
+              
+              var line   = zone.id.split("-");
+              // ユーザーID
+              var userId = line[0].slice(1);
+              // タスク状態
+              var taskStatus = line[1];
+              
+              // タスク状態変更
+              window.location.href = taskboardId + "/user/" + userId + "/tasks/" +  taskId + "/status/" + taskStatus;
+            });
+          });
+       });
+      </script>
+
     </div>
 
     <!--削除モーダル-->

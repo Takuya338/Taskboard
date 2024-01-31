@@ -1,7 +1,8 @@
 {{-- resources/views/tasks/create.blade.php --}}
-
+@extends('base.baseTemplete')
+@section('content')
       <!--戻るボタン-->
-      @include('parts.backbutton', ['url'=>route('board', $taskboadId)])
+      @include('parts.backbutton', ['url'=>route('board', $taskboardId)])
 
       <!--タイトル行-->
       <div class="row">
@@ -12,7 +13,7 @@
       <!--登録フォーム-->
       <div class="row">
         <div class="col-xl-5">
-          <form method="post" action="{{ route('tasks.store') }}">
+          <form method="post" action="{{ route('tasks.store',$taskboardId) }}">
             @csrf
             <!--タスク内容入力フォーム-->
             <div class="form-group">
@@ -29,7 +30,7 @@
             </div>
 
             <!--担当者選択フォーム-->
-            @include('parts.checkbox', ['label'=>'タスク担当者', 'name'=>'user', 'datas'=>$users])
+            @include('form.select', ['label'=>'タスク担当者', 'name'=>'user', 'datas'=>$users])
 
             <!--登録ボタン-->
             <div class="form-group">
@@ -38,3 +39,4 @@
           </form>
         </div>
       </div>
+@endsection
