@@ -374,4 +374,39 @@ class TaskBoardRepositoryTest extends TestCase
         $this->assertDatabaseMissing('taskboard_user', ['taskboardId' => $taskboard->taskboardId, 'userId' => $user1->userId, 'creatorId' => $user1->userId, 'updaterId' => $nonAdminUser->userId]);
         $this->assertDatabaseMissing('taskboard_user', ['taskboardId' => $taskboard->taskboardId, 'userId' => $user2->userId, 'creatorId' => $nonAdminUser->userId, 'updaterId' => $nonAdminUser->userId]);
     }
+
+    public function testDeleteUserTaskboardsWithSpecificTaskboards()
+    {
+        // テストデータの作成
+        $this->user1 = factory(User::class)->create();
+        $this->user2 = factory(User::class)->create();
+        $this->taskboard = factory(Taskboard::class)->create();
+        $this->taskboardUser1 = factory(TaskboardUser::class)->create([
+            'userId' => $this->user1->id,
+            'taskboardId' => $this->taskboard->id,
+        ]);
+        
+        $taskboardIds = [$this->taskboard->id];
+
+        $result = $this->taskBoardRepository->deleteUserTaskboards($this->user1->id, $taskboardIds);
+
+        $this->assertTrue($result);
+    }
+
+    public function testDeleteUserTaskboardsWithAllTaskboards()
+    {
+        // テストデータの作成
+        $this->user1 = factory(User::class)->create();
+        $this->user2 = factory(User::class)->create();
+        $this->taskboard = factory(Taskboard::class)->create();
+        $this->taskboardUser1 = factory(TaskboardUser::class)->create([
+            'userId' => $this->user1->id,
+            'taskboardId' => $this->taskboard->id,
+        ]);
+        
+        $result = $this->taskBoardRepository->deleteUserTaskboards($this->user1->id);
+
+        $this->assertTrue($result);
+    }
+
 }
