@@ -378,35 +378,170 @@ class TaskBoardRepositoryTest extends TestCase
     public function testDeleteUserTaskboardsWithSpecificTaskboards()
     {
         // テストデータの作成
-        $this->user1 = factory(User::class)->create();
-        $this->user2 = factory(User::class)->create();
-        $this->taskboard = factory(Taskboard::class)->create();
-        $this->taskboardUser1 = factory(TaskboardUser::class)->create([
-            'userId' => $this->user1->id,
-            'taskboardId' => $this->taskboard->id,
+        $user = User::factory()->create();
+        $taskboard = Taskboard::factory()->create();
+ 
+        $taskboardUser = TaskboardUser::factory()->create([
+             'userId' => $user->userId,
+             'taskboardId' => $taskboard->taskboardId
         ]);
-        
-        $taskboardIds = [$this->taskboard->id];
 
-        $result = $this->taskBoardRepository->deleteUserTaskboards($this->user1->id, $taskboardIds);
+        $taskboardIds = [$taskboard->taskboardId];
 
-        $this->assertTrue($result);
+        $result = $this->taskBoardRepository->deleteUserTaskboards($user->userId, $taskboardIds);
+
+        $this->assertDatabaseMissing('taskboard_user', ['userId' => $user->userId,'taskboardId' => $taskboard->taskboardId]);
+       
     }
 
     public function testDeleteUserTaskboardsWithAllTaskboards()
     {
         // テストデータの作成
-        $this->user1 = factory(User::class)->create();
-        $this->user2 = factory(User::class)->create();
-        $this->taskboard = factory(Taskboard::class)->create();
-        $this->taskboardUser1 = factory(TaskboardUser::class)->create([
-            'userId' => $this->user1->id,
-            'taskboardId' => $this->taskboard->id,
+        $user = User::factory()->create();
+        $taskboard = Taskboard::factory()->create();
+ 
+        $taskboardUser = TaskboardUser::factory()->create([
+             'userId' => $user->userId,
+             'taskboardId' => $taskboard->taskboardId
+        ]);
+
+        $result = $this->taskBoardRepository->deleteUserTaskboards($user->userId);
+
+        $this->assertDatabaseMissing('taskboard_user', ['userId' => $user->userId,'taskboardId' => $taskboard->taskboardId]);
+    }
+    
+    public function testCreateTask()
+    {
+        // 非管理者ユーザーを作成し、認証する
+        $nonAdmin = User::factory()->create(['userType' => config('code.user.type.user'), 'creatorId'=>1, 'updaterId'=>1]);
+        Auth::shouldReceive('user')->andReturn();
+        Auth::shouldReceive('id')->andReturn($nonAdmin->userId);
+        
+        // 仮のタスクボードIDとタスクデータを用意
+        $user = User::factory()->create();
+        $taskboard = Taskboard::factory()->create();
+        $taskData = [
+            'content' => 'Test task content',
+            'userId' => $user->userId, // 実行者ID
+        ];
+
+        // タスク作成
+        $task = $this->taskBoardRepository->createTask($taskboard->taskboardId,$taskData);
+        
+        // 結果検証
+        $this->assertDatabaseHas('tasks', [
+            'taskboardId' => $taskboard->taskboardId,
+            'content' => 'Test task content',
+            'executorId' => $user->userId,
+            'creatorId' => $nonAdmin->userId,
+            'updaterId' => $nonAdmin->userId,
+            'taskStatus' => config('code.taskboard.status.todo'),
+        ]);
+    }
+    
+    public function testUpdateTask()
+    {
+        // 非管理者ユーザーを作成し、認証する
+        $nonAdmin = User::factory()->create(['userType' => config('code.user.type.user'), 'creatorId'=>1, 'updaterId'=>1]);
+        Auth::shouldReceive('user')->andReturn();
+        Auth::shouldReceive('id')->andReturn($nonAdmin->userId);
+        
+        // ユーザー作成
+        $user = User::create([
+            'name' => 'Alice Smith',
+            'email' => 'alice@example.com',
+            'userStatus' => config('code.user.status.first'),
+            'userType' => 1,
+            'password' => 'password',
+            'creatorId' => 1,
+            'updaterId' => 1
         ]);
         
-        $result = $this->taskBoardRepository->deleteUserTaskboards($this->user1->id);
-
-        $this->assertTrue($result);
+        // タスクボード作成
+        $taskboard = Taskboard::create([
+            'taskboardName' => 'タスクボード管理システム改修',
+            'creatorId' => 1,
+            'updaterId' => 1
+        ]);
+        
+        $task = Task::factory()->create(['taskboardId' => $taskboard->taskboardId, 'executorId' => $nonAdmin->userId]);
+        
+        $data = [
+            'content' => 'task',
+            'taskStatus' => config('code.taskboard.status.todo'),
+            'userId'=> $user->userId,
+        ];
+        
+        // タスク更新
+        $result = $this->taskBoardRepository->updateTask($task->taskId, $data);
+        
+        // 結果検証
+        $this->assertIsArray($result);
+        $this->assertDatabaseHas('tasks', [
+            'taskboardId' => $taskboard->taskboardId,
+            'content' => $data['content'],
+            'executorId' => $data['userId'],
+            'updaterId' => $nonAdmin->userId,
+            'taskStatus' => config('code.taskboard.status.todo'),
+        ]);
     }
-
+    
+    public function testGetTaskByTaskboardId()
+    {
+        // テスト用ユーザーとタスクボード
+        $user = User::factory()->create();
+        $taskboard1 = Taskboard::factory()->create();
+        $taskboard2 = Taskboard::factory()->create();
+        
+        // テスト用タスク
+        $task1 = Task::factory()->create(['taskboardId' => $taskboard1->taskboardId, 'executorId' => $user->userId]);
+        $task2 = Task::factory()->create(['taskboardId' => $taskboard2->taskboardId, 'executorId' => $user->userId]);
+        
+        // タスク取得
+        $result = $this->taskBoardRepository->getTaskByTaskboardId($taskboard1->taskboardId);
+        
+        // 結果検証
+        $this->assertIsArray($result);
+        $this->assertEquals($result[0][0], $task1->taskId);
+        $this->assertEquals($result[0][1], $task1->content);
+        $this->assertEquals($result[0][2], $user->userId);
+        $this->assertEquals($result[0][3], $user->name);
+        $this->assertEquals($result[0][4], $task1->updated_at);
+        $this->assertEquals($result[0][5], $task1->taskStatus);
+    }
+    
+    public function testGetLoginUserId()
+    {
+        // 非管理者ユーザーを作成し、認証する
+        $nonAdmin = User::factory()->create(['userType' => config('code.user.type.user'), 'creatorId'=>1, 'updaterId'=>1]);
+        Auth::shouldReceive('user')->andReturn();
+        Auth::shouldReceive('id')->andReturn($nonAdmin->userId);
+        
+        $result = $this->taskBoardRepository->getLoginUserId();
+        $this->assertEquals($result, $nonAdmin->userId);
+    }
+    
+    public function testgetUserTaskboard()
+    {
+        // 非管理者ユーザーを作成し、認証する
+        $nonAdmin = User::factory()->create(['userType' => config('code.user.type.user'), 'creatorId'=>1, 'updaterId'=>1]);
+        Auth::shouldReceive('user')->andReturn();
+        Auth::shouldReceive('id')->andReturn($nonAdmin->userId);
+        
+        // テスト用タスクボード
+        $taskboard1 = Taskboard::factory()->create();
+        $taskboard2 = Taskboard::factory()->create();
+        
+        // テスト用タスクボード利用者
+        $taskboardUser = TaskboardUser::factory()->create([
+             'userId' => $nonAdmin->userId,
+             'taskboardId' => $taskboard1->taskboardId
+        ]);
+        
+        // 結果検証
+        $result = $this->taskBoardRepository->getUserTaskboard($taskboard1->taskboardId);
+        $this->assertEquals($result, 1);
+        $result = $this->taskBoardRepository->getUserTaskboard($taskboard2->taskboardId);
+        $this->assertEquals($result, 0);
+    }
 }
