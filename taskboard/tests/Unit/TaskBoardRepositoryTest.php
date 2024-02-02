@@ -374,5 +374,4 @@ class TaskBoardRepositoryTest extends TestCase
         $this->assertDatabaseMissing('taskboard_user', ['taskboardId' => $taskboard->taskboardId, 'userId' => $user1->userId, 'creatorId' => $user1->userId, 'updaterId' => $nonAdminUser->userId]);
         $this->assertDatabaseMissing('taskboard_user', ['taskboardId' => $taskboard->taskboardId, 'userId' => $user2->userId, 'creatorId' => $nonAdminUser->userId, 'updaterId' => $nonAdminUser->userId]);
     }
-
 }
