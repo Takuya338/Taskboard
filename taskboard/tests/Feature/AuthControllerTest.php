@@ -18,7 +18,7 @@ class AuthControllerTest extends TestCase
         $response->assertViewIs('auth.login');
     }
     
-    /*public function testSuccessfulLogin()
+    public function testSuccessfulLogin()
     {
         // LoginServiceのモックを作成して、常にtrueを返すように設定
         $this->mock(LoginService::class, function ($mock) {
@@ -32,7 +32,7 @@ class AuthControllerTest extends TestCase
 
         // リダイレクトの検証
         $response->assertRedirect('/taskboards');
-    }*/
+    }
 
 
     /*public function testLogout()
